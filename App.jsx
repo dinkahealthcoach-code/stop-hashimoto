@@ -57,7 +57,7 @@ function pj(text){
   }
 }
 async function callClaude(messages,system,maxTokens=2000){
-  const body={model:"claude-sonnet-4-20250514",max_tokens:maxTokens,messages};
+  const body={model:"claude-haiku-4-5-20251001",max_tokens:maxTokens,messages};
   if(system)body.system=system;
   const res=await fetch("/api/claude",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
   const data=await res.json();
