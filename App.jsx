@@ -43,7 +43,19 @@ async function dbGet(k){try{const r=await window.storage.get(k,false);return r?J
 async function dbSet(k,v){try{await window.storage.set(k,JSON.stringify(v),false);}catch{}}
 
 // ── API ───────────────────────────────────────────────────────────────────────
-function pj(text){return JSON.parse(text.replace(/```json\s*/gi,"").replace(/```\s*/g,"").trim());}
+function pj(text){
+  try{
+    // Limpiar markdown y caracteres extraños
+    let clean=text.replace(/```json\s*/gi,"").replace(/```\s*/g,"").trim();
+    // Extraer solo el JSON si hay texto extra
+    const match=clean.match(/\{[\s\S]*\}/);
+    if(match)clean=match[0];
+    return JSON.parse(clean);
+  }catch(e){
+    console.error("Error parseando JSON:",text);
+    throw new Error("Error al interpretar la respuesta de la IA.");
+  }
+}
 async function callClaude(messages,system,maxTokens=2000){
   const body={model:"claude-sonnet-4-20250514",max_tokens:maxTokens,messages};
   if(system)body.system=system;
