@@ -45,11 +45,9 @@ async function dbSet(k,v){try{await window.storage.set(k,JSON.stringify(v),false
 // ── API ───────────────────────────────────────────────────────────────────────
 function pj(text){return JSON.parse(text.replace(/```json\s*/gi,"").replace(/```\s*/g,"").trim());}
 async function callClaude(messages,system,maxTokens=2000){
-  const apiKey=import.meta.env.VITE_ANTHROPIC_API_KEY;
-  if(!apiKey)throw new Error("API key no configurada. Contacta a tu coach.");
   const body={model:"claude-sonnet-4-20250514",max_tokens:maxTokens,messages};
   if(system)body.system=system;
-  const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify(body)});
+  const res=await fetch("/api/claude",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
   const data=await res.json();
   if(data.error)throw new Error(data.error.message);
   return data.content.filter(b=>b.type==="text").map(b=>b.text).join("\n");
