@@ -454,16 +454,20 @@ function PantryTab({state,dispatch}){
     setLoading(true);setErr(null);
     try{
       const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(",")[1]);r.onerror=rej;r.readAsDataURL(file);});
-      const sys=`Eres asistente de nutrición del Método Eri para Hashimoto. Responde SOLO con JSON válido.`;
+      const sys=`Eres un asistente experto en nutrición del programa Stop Hashimoto. Tu tarea es identificar alimentos en imágenes. Siempre respondes SOLO con JSON válido, sin texto adicional, sin markdown, sin explicaciones.`;
       const txt=await callClaude([{role:"user",content:[
         {type:"image",source:{type:"base64",media_type:file.type,data:b64}},
-        {type:"text",text:`Analiza esta foto de despensa o alimentos frescos y extrae todos los alimentos visibles. Clasifica cada uno en: proteina, carbohidrato, verdura, fruta, grasa, otro.\n\nResponde SOLO con este JSON:\n{"items":[{"name":"string","quantity":1,"unit":"string","category":"proteina|carbohidrato|verdura|fruta|grasa|otro"}]}`}
+        {type:"text",text:`Identifica TODOS los alimentos, ingredientes o productos alimenticios que puedas ver en esta imagen. Pueden estar en una despensa, refrigerador, mesón, bolsa o plato. Sé generoso — si puedes adivinar que es un alimento, inclúyelo. Clasifica cada uno en: proteina, carbohidrato, verdura, fruta, grasa, otro. Si la imagen no tiene alimentos visibles, devuelve items vacío.
+
+Responde ÚNICAMENTE con este JSON sin ningún texto antes o después:
+{"items":[{"name":"nombre en español","quantity":1,"unit":"unidad","category":"proteina|carbohidrato|verdura|fruta|grasa|otro"}]}`}
       ]}],sys,1500);
       const parsed=pj(txt);
+      if(!parsed.items||parsed.items.length===0){setErr("No detecté alimentos en la foto. Asegúrate de que los alimentos estén bien visibles.");return;}
       dispatch({type:"MERGE_PANTRY",p:parsed.items});
       const next=[...pantry];parsed.items.forEach(ni=>{const idx=next.findIndex(i=>i.name.toLowerCase()===ni.name.toLowerCase());idx>=0?(next[idx]={...next[idx],quantity:(next[idx].quantity||0)+(ni.quantity||0)}):next.push(ni);});
       await dbSet("pantry:items",next);
-    }catch{setErr("No pude identificar los alimentos. Intenta con mejor iluminación.");}
+    }catch(e){setErr("Error al procesar la imagen: "+e.message);}
     finally{setLoading(false);if(fileRef.current)fileRef.current.value="";}
   }
   const visible=filter==="all"?pantry:pantry.filter(i=>i.category===filter);
