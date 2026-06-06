@@ -13,6 +13,154 @@ const T = {
 const FD = `'Palatino Linotype', Georgia, serif`;
 const FB = `'Trebuchet MS', 'Century Gothic', sans-serif`;
 
+// ── LEMON SQUEEZY CONFIG ─────────────────────────────────────────────────────
+const LS_PREMIUM_URL = "https://stophashimoto.lemonsqueezy.com/checkout/buy/6ba9043a-2389-49a2-b361-862b0702869f";
+const LS_ALUMNAS_URL = "https://stophashimoto.lemonsqueezy.com/checkout/buy/757e5d80-a898-4648-a04a-f85b1697bcbc";
+const FREE_RECIPES_LIMIT = 5;
+
+// ── MEMBERSHIP HELPERS ────────────────────────────────────────────────────────
+async function getMembership(){try{const r=await window.storage.get("membership:status",false);return r?JSON.parse(r.value):null;}catch{return null;}}
+async function setMembership(data){try{await window.storage.set("membership:status",JSON.stringify(data),false);}catch{}}
+
+// ── PAYWALL SCREEN ────────────────────────────────────────────────────────────
+function PaywallScreen({onActivate}){
+  const [code,setCode]=useState("");
+  const [loading,setLoading]=useState(false);
+  const [err,setErr]=useState(null);
+  const [tab,setTab]=useState("planes"); // planes | codigo
+
+  async function handleCode(){
+    if(!code.trim()){setErr("Ingresa tu email de compra.");return;}
+    setLoading(true);setErr(null);
+    // Simulación de verificación — en producción conectar con webhook de Lemon Squeezy
+    await new Promise(r=>setTimeout(r,1200));
+    if(code.toLowerCase().includes("@")){
+      await setMembership({type:"premium",email:code.toLowerCase(),activatedAt:Date.now()});
+      onActivate("premium");
+    } else {
+      setErr("Email no encontrado. Verifica que sea el mismo con el que compraste.");
+    }
+    setLoading(false);
+  }
+
+  return(
+    <div style={{minHeight:"100svh",background:`linear-gradient(160deg,${T.ink} 0%,${T.brown} 60%,${T.terra} 100%)`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"32px 24px",fontFamily:FB}}>
+      <div style={{width:64,height:64,borderRadius:20,background:"rgba(255,255,255,0.1)",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:16,backdropFilter:"blur(10px)"}}>
+        <Leaf size={28} color="white"/>
+      </div>
+      <p style={{fontSize:11,color:"rgba(255,255,255,0.5)",letterSpacing:"0.2em",textTransform:"uppercase",marginBottom:6}}>Stop Hashimoto®</p>
+      <h1 style={{fontFamily:FD,fontSize:28,color:"white",fontWeight:700,textAlign:"center",marginBottom:6,lineHeight:1.2}}>Tu app para sanar{"\n"}desde la raíz</h1>
+      <p style={{fontSize:13,color:"rgba(255,255,255,0.6)",textAlign:"center",marginBottom:32,lineHeight:1.6}}>Recetas AIP · IA nutricional · Método Eri</p>
+
+      {/* TABS */}
+      <div style={{display:"flex",background:"rgba(255,255,255,0.1)",borderRadius:16,padding:4,marginBottom:24,width:"100%",maxWidth:340}}>
+        {[["planes","Ver planes"],["codigo","Ya tengo acceso"]].map(([id,label])=>(
+          <button key={id} onClick={()=>setTab(id)} style={{flex:1,padding:"10px",borderRadius:12,border:"none",background:tab===id?"white":"transparent",color:tab===id?T.brown:"rgba(255,255,255,0.7)",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:FB,transition:"all .2s"}}>{label}</button>
+        ))}
+      </div>
+
+      {tab==="planes"&&(
+        <div style={{width:"100%",maxWidth:340,display:"flex",flexDirection:"column",gap:12}}>
+          {/* PLAN GRATUITO */}
+          <div style={{borderRadius:20,background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.15)",padding:"20px",backdropFilter:"blur(10px)"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
+              <div><p style={{fontSize:14,fontWeight:700,color:"white",marginBottom:2}}>Plan Gratuito</p><p style={{fontSize:11,color:"rgba(255,255,255,0.5)"}}>Sin tarjeta requerida</p></div>
+              <span style={{fontSize:20,fontWeight:800,color:"rgba(255,255,255,0.4)"}}>$0</span>
+            </div>
+            {["5 recetas del Método Eri","Guía de fases AIP","Consejo del día"].map(f=>(
+              <div key={f} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+                <CheckCircle size={12} color="rgba(255,255,255,0.3)"/>
+                <span style={{fontSize:12,color:"rgba(255,255,255,0.5)"}}>{f}</span>
+              </div>
+            ))}
+            <button onClick={()=>onActivate("free")} style={{width:"100%",marginTop:14,padding:"12px",borderRadius:14,border:"1px solid rgba(255,255,255,0.2)",background:"transparent",color:"rgba(255,255,255,0.6)",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:FB}}>
+              Continuar gratis
+            </button>
+          </div>
+
+          {/* PLAN PREMIUM */}
+          <div style={{borderRadius:20,background:`linear-gradient(135deg,${T.terra},${T.terraLight})`,padding:"20px",boxShadow:`0 12px 40px ${T.terra}66`,position:"relative",overflow:"hidden"}}>
+            <div style={{position:"absolute",top:-20,right:-20,width:80,height:80,borderRadius:"50%",background:"rgba(255,255,255,0.08)"}}/>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
+              <div>
+                <span style={{fontSize:9,fontWeight:800,color:"white",letterSpacing:"0.15em",textTransform:"uppercase",background:"rgba(255,255,255,0.2)",padding:"3px 8px",borderRadius:8}}>MÁS POPULAR</span>
+                <p style={{fontSize:14,fontWeight:700,color:"white",marginTop:6,marginBottom:2}}>Plan Premium</p>
+                <p style={{fontSize:11,color:"rgba(255,255,255,0.75)"}}>Acceso completo</p>
+              </div>
+              <div style={{textAlign:"right"}}>
+                <span style={{fontSize:22,fontWeight:800,color:"white"}}>$12.90</span>
+                <p style={{fontSize:10,color:"rgba(255,255,255,0.7)"}}>/mes</p>
+              </div>
+            </div>
+            {["24 recetas AIP Método Eri","IA identificador de alimentos","Verificador de etiquetas AIP","Generador de recetas con IA","Seguimiento de síntomas","Plan semanal + macros"].map(f=>(
+              <div key={f} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+                <CheckCircle size={12} color="white"/>
+                <span style={{fontSize:12,color:"white"}}>{f}</span>
+              </div>
+            ))}
+            <button onClick={()=>window.open(LS_PREMIUM_URL,"_blank")} style={{width:"100%",marginTop:16,padding:"14px",borderRadius:14,border:"none",background:"white",color:T.terra,fontSize:14,fontWeight:800,cursor:"pointer",fontFamily:FB,boxShadow:"0 4px 16px rgba(0,0,0,0.15)"}}>
+              Suscribirme ahora →
+            </button>
+          </div>
+
+          {/* PLAN ALUMNAS */}
+          <div style={{borderRadius:20,background:"rgba(255,255,255,0.08)",border:`1px solid ${T.sageLight}44`,padding:"20px",backdropFilter:"blur(10px)"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
+              <div>
+                <span style={{fontSize:9,fontWeight:800,color:T.sageLight,letterSpacing:"0.15em",textTransform:"uppercase",background:"rgba(184,212,187,0.15)",padding:"3px 8px",borderRadius:8}}>ALUMNAS STOP HASHIMOTO</span>
+                <p style={{fontSize:14,fontWeight:700,color:"white",marginTop:6,marginBottom:2}}>Plan Alumnas</p>
+                <p style={{fontSize:11,color:"rgba(255,255,255,0.5)"}}>1 mes gratis · luego $8.90/mes</p>
+              </div>
+              <div style={{textAlign:"right"}}>
+                <span style={{fontSize:22,fontWeight:800,color:T.sageLight}}>$8.90</span>
+                <p style={{fontSize:10,color:"rgba(255,255,255,0.5)"}}>/mes</p>
+              </div>
+            </div>
+            {["Todo el Plan Premium","1 mes de prueba gratis","Precio especial alumnas"].map(f=>(
+              <div key={f} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+                <CheckCircle size={12} color={T.sageLight}/>
+                <span style={{fontSize:12,color:"rgba(255,255,255,0.7)"}}>{f}</span>
+              </div>
+            ))}
+            <button onClick={()=>window.open(LS_ALUMNAS_URL,"_blank")} style={{width:"100%",marginTop:14,padding:"12px",borderRadius:14,border:`1px solid ${T.sageLight}`,background:"transparent",color:T.sageLight,fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:FB}}>
+              Acceder como alumna →
+            </button>
+          </div>
+        </div>
+      )}
+
+      {tab==="codigo"&&(
+        <div style={{width:"100%",maxWidth:340}}>
+          <div style={{borderRadius:20,background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.15)",padding:"24px",backdropFilter:"blur(10px)"}}>
+            <p style={{fontSize:14,fontWeight:700,color:"white",marginBottom:4}}>Activar acceso premium</p>
+            <p style={{fontSize:12,color:"rgba(255,255,255,0.5)",marginBottom:20,lineHeight:1.6}}>Ingresa el email con el que realizaste tu compra en Lemon Squeezy.</p>
+            <input value={code} onChange={e=>setCode(e.target.value)} placeholder="tu@email.com" style={{width:"100%",padding:"14px 16px",borderRadius:14,border:"1px solid rgba(255,255,255,0.2)",background:"rgba(255,255,255,0.05)",color:"white",fontSize:14,fontFamily:FB,boxSizing:"border-box",outline:"none"}}/>
+            {err&&<p style={{fontSize:12,color:T.terraLight,marginTop:8}}>{err}</p>}
+            <button onClick={handleCode} disabled={loading} style={{width:"100%",marginTop:14,padding:"14px",borderRadius:14,border:"none",background:loading?"rgba(255,255,255,0.1)":`linear-gradient(135deg,${T.terra},${T.terraLight})`,color:"white",fontSize:14,fontWeight:700,cursor:loading?"not-allowed":"pointer",fontFamily:FB}}>
+              {loading?"Verificando…":"Activar acceso →"}
+            </button>
+          </div>
+          <p style={{fontSize:11,color:"rgba(255,255,255,0.3)",textAlign:"center",marginTop:16,lineHeight:1.6}}>¿Problemas? Escríbenos a dinkahealthcoach@gmail.com</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── PREMIUM LOCK BANNER ───────────────────────────────────────────────────────
+function PremiumLock({onUpgrade}){
+  return(
+    <div style={{margin:"16px 0",borderRadius:20,background:`linear-gradient(135deg,${T.terra}22,${T.terraLight}22)`,border:`1.5px solid ${T.terra}44`,padding:"20px",textAlign:"center"}}>
+      <p style={{fontSize:24,marginBottom:8}}>🔒</p>
+      <p style={{fontFamily:FD,fontSize:16,fontWeight:700,color:T.brown,marginBottom:4}}>Función Premium</p>
+      <p style={{fontSize:12,color:T.stone,lineHeight:1.6,marginBottom:14}}>Desbloquea el acceso completo al Método Eri con IA por $12.90/mes</p>
+      <button onClick={onUpgrade} style={{padding:"12px 24px",borderRadius:14,border:"none",background:`linear-gradient(135deg,${T.terra},${T.terraLight})`,color:"white",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:FB,boxShadow:`0 4px 16px ${T.terra}44`}}>
+        Ver planes →
+      </button>
+    </div>
+  );
+}
+
 // ── STORAGE ──────────────────────────────────────────────────────────────────
 const init = { profile:null, pantry:[], recipesHistory:[], ticketsHistory:[] };
 function reducer(state, action) {
@@ -292,7 +440,7 @@ function Onboarding({onDone}){
 }
 
 // ── HOME ──────────────────────────────────────────────────────────────────────
-function HomeTab({state,goTo}){
+function HomeTab({state,goTo,isPremium,onUpgrade}){
   const {profile,pantry,recipesHistory}=state;
   const hr=new Date().getHours();
   const greet=hr<12?"Buenos días":hr<20?"Buenas tardes":"Buenas noches";
@@ -452,7 +600,7 @@ Responde SOLO con este JSON:
 }
 
 // ── DESPENSA ──────────────────────────────────────────────────────────────────
-function PantryTab({state,dispatch}){
+function PantryTab({state,dispatch,isPremium,onUpgrade}){
   const {pantry,profile}=state;
   const [loading,setLoading]=useState(false);
   const [err,setErr]=useState(null);
@@ -486,18 +634,20 @@ Responde ÚNICAMENTE con este JSON sin ningún texto antes o después:
       <h2 style={{fontFamily:FD,fontSize:26,color:T.brown,fontWeight:700,marginBottom:4}}>Despensa Método Eri</h2>
       <p style={{fontSize:12,color:T.stone,marginBottom:16}}>{pantry.length} ingredientes disponibles</p>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
-        <label style={{display:"block"}}>
-          <input ref={fileRef} type="file" accept="image/*" capture="environment" style={{display:"none"}} onChange={handleFile}/>
-          <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:6,padding:"16px 10px",borderRadius:20,background:`linear-gradient(135deg,${T.terra},${T.terraLight})`,cursor:"pointer",boxShadow:`0 6px 20px ${T.terra}44`,textAlign:"center"}}>
+        <label style={{display:"block"}} onClick={!isPremium?e=>{e.preventDefault();onUpgrade();}:undefined}>
+          <input ref={fileRef} type="file" accept="image/*" capture="environment" style={{display:"none"}} onChange={isPremium?handleFile:undefined}/>
+          <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:6,padding:"16px 10px",borderRadius:20,background:isPremium?`linear-gradient(135deg,${T.terra},${T.terraLight})`:`linear-gradient(135deg,${T.stoneMid},${T.stone})`,cursor:"pointer",boxShadow:isPremium?`0 6px 20px ${T.terra}44`:"none",textAlign:"center",position:"relative"}}>
+            {!isPremium&&<span style={{position:"absolute",top:8,right:8,fontSize:10}}>🔒</span>}
             <Camera size={20} color="white"/>
             <span style={{fontSize:12,fontWeight:700,color:"white",lineHeight:1.3}}>Foto de despensa</span>
-            <span style={{fontSize:10,color:"rgba(255,255,255,0.75)"}}>Identifica alimentos</span>
+            <span style={{fontSize:10,color:"rgba(255,255,255,0.75)"}}>{isPremium?"Identifica alimentos":"Premium"}</span>
           </div>
         </label>
-        <button onClick={()=>setShowEtiqueta(true)} style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:6,padding:"16px 10px",borderRadius:20,background:`linear-gradient(135deg,${T.brown},${T.brownMid})`,border:"none",cursor:"pointer",boxShadow:`0 6px 20px ${T.brown}44`,textAlign:"center"}}>
+        <button onClick={isPremium?()=>setShowEtiqueta(true):onUpgrade} style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:6,padding:"16px 10px",borderRadius:20,background:isPremium?`linear-gradient(135deg,${T.brown},${T.brownMid})`:`linear-gradient(135deg,${T.stoneMid},${T.stone})`,border:"none",cursor:"pointer",boxShadow:isPremium?`0 6px 20px ${T.brown}44`:"none",textAlign:"center",position:"relative"}}>
+          {!isPremium&&<span style={{position:"absolute",top:8,right:8,fontSize:10}}>🔒</span>}
           <span style={{fontSize:20}}>🏷️</span>
           <span style={{fontSize:12,fontWeight:700,color:"white",lineHeight:1.3}}>Verificar etiqueta</span>
-          <span style={{fontSize:10,color:"rgba(255,255,255,0.75)"}}>¿Es apto AIP?</span>
+          <span style={{fontSize:10,color:"rgba(255,255,255,0.75)"}}>{isPremium?"¿Es apto AIP?":"Premium"}</span>
         </button>
       </div>
       {loading&&<Spin msg="Identificando alimentos en tu despensa…"/>}
@@ -605,7 +755,7 @@ function RecetaModal({receta,onClose}){
 }
 
 // ── RECETARIO ─────────────────────────────────────────────────────────────────
-function RecetarioSH({onBack,perfilFase}){
+function RecetarioSH({onBack,perfilFase,isPremium,onUpgrade}){
   const fasesDisp=["Eliminación","Reintroducción","Mantenimiento"];
   const faseInicial=perfilFase&&fasesDisp.includes(perfilFase)?perfilFase:"Eliminación";
   const [fase,setFase]=useState(faseInicial);
@@ -613,11 +763,12 @@ function RecetarioSH({onBack,perfilFase}){
   const [q,setQ]=useState("");
   const [abierta,setAbierta]=useState(null);
   const rFase=FASES[fase];
-  const filtradas=RECETARIO.filter(r=>
+  const todasFiltradas=RECETARIO.filter(r=>
     r.fases.includes(fase)&&
     (cat==="todos"||r.cat===cat)&&
     (q===""||r.titulo.toLowerCase().includes(q.toLowerCase())||r.ing.some(i=>i.toLowerCase().includes(q.toLowerCase())))
   );
+  const filtradas=isPremium?todasFiltradas:todasFiltradas.slice(0,FREE_RECIPES_LIMIT);
   return(
     <div style={{padding:"20px 20px 96px",fontFamily:FB}}>
       <button onClick={onBack} style={{display:"flex",alignItems:"center",gap:6,background:"none",border:"none",cursor:"pointer",fontSize:13,color:T.stone,fontWeight:600,marginBottom:16,padding:0}}><ChevronLeft size={16}/> Volver</button>
@@ -644,7 +795,7 @@ function RecetarioSH({onBack,perfilFase}){
       <div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:10,marginBottom:16}}>
         {CATS_R.map(c=><button key={c.id} onClick={()=>setCat(c.id)} style={{flexShrink:0,padding:"7px 14px",borderRadius:20,border:`1.5px solid ${cat===c.id?T.sage:T.stoneMid}`,background:cat===c.id?T.sage:"white",color:cat===c.id?"white":T.brown,fontSize:12,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",fontFamily:FB}}>{c.emoji} {c.label}</button>)}
       </div>
-      <p style={{fontSize:11,color:T.stone,marginBottom:12}}>{filtradas.length} receta{filtradas.length!==1?"s":""} para {fase}</p>
+      <p style={{fontSize:11,color:T.stone,marginBottom:12}}>{filtradas.length} receta{filtradas.length!==1?"s":""} para {fase}{!isPremium?" (plan gratuito: 5 recetas)":""}</p>
       {filtradas.length===0?<div style={{textAlign:"center",padding:"40px 16px",color:T.stone,fontSize:13}}>No encontré recetas con ese término 🌿</div>
        :filtradas.map(r=>(
         <button key={r.id} onClick={()=>setAbierta(r)} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 16px",borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,marginBottom:10,cursor:"pointer",textAlign:"left"}}>
@@ -662,6 +813,7 @@ function RecetarioSH({onBack,perfilFase}){
           <ChevronRight size={16} color={T.stoneMid}/>
         </button>
        ))}
+      {!isPremium&&todasFiltradas.length>FREE_RECIPES_LIMIT&&<PremiumLock onUpgrade={onUpgrade}/>}
       {abierta&&<RecetaModal receta={abierta} onClose={()=>setAbierta(null)}/>}
     </div>
   );
@@ -787,7 +939,7 @@ function CreateByFase({profile,state,dispatch,onBack}){
 }
 
 // ── RECETAS TAB ───────────────────────────────────────────────────────────────
-function RecipesTab({state,dispatch}){
+function RecipesTab({state,dispatch,isPremium,onUpgrade}){
   const {pantry,profile,recipesHistory}=state;
   const [modo,setModo]=useState("inicio");
   const [recipes,setRecipes]=useState([]);
@@ -819,18 +971,20 @@ function RecipesTab({state,dispatch}){
     dispatch({type:"ADD_RH",p:entry});
     await dbSet("history:recipes",[entry,...state.recipesHistory].slice(0,30));
   }
-  if(modo==="fase")return<CreateByFase profile={profile} state={state} dispatch={dispatch} onBack={()=>{setModo("inicio");setRecipes([]);}}/>;
-  if(modo==="recetario")return<RecetarioSH onBack={()=>setModo("inicio")} perfilFase={profile?.fase_eri}/>;
+  if(modo==="fase")return isPremium?<CreateByFase profile={profile} state={state} dispatch={dispatch} onBack={()=>{setModo("inicio");setRecipes([]);}}/>:<div style={{padding:"56px 20px 96px"}}><button onClick={()=>setModo("inicio")} style={{display:"flex",alignItems:"center",gap:6,background:"none",border:"none",cursor:"pointer",fontSize:13,color:T.stone,fontWeight:600,marginBottom:20,padding:0,fontFamily:FB}}><ChevronLeft size={16}/> Volver</button><PremiumLock onUpgrade={onUpgrade}/></div>;
+  if(modo==="recetario")return<RecetarioSH onBack={()=>setModo("inicio")} perfilFase={profile?.fase_eri} isPremium={isPremium} onUpgrade={onUpgrade}/>;
   return(
     <div style={{padding:"56px 20px 96px",fontFamily:FB}}>
       <h2 style={{fontFamily:FD,fontSize:26,color:T.brown,fontWeight:700,marginBottom:4}}>Recetas Método Eri</h2>
       <p style={{fontSize:12,color:T.stone,marginBottom:20}}>Personalizadas para Hashimoto</p>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
-        <button onClick={()=>setModo("despensa")} style={{display:"flex",flexDirection:"column",alignItems:"flex-start",padding:"16px",borderRadius:20,border:`2px solid ${modo==="despensa"?T.sage:T.stonePale}`,background:modo==="despensa"?T.sagePale:T.warmWhite,cursor:"pointer",textAlign:"left"}}>
-          <ShoppingBag size={20} color={T.sage} style={{marginBottom:8}}/><p style={{fontSize:13,fontWeight:700,color:T.brown,fontFamily:FB}}>Con mi despensa</p><p style={{fontSize:11,color:T.stone,marginTop:3,lineHeight:1.4}}>Recetas con lo que ya tienes</p>
+        <button onClick={()=>isPremium?setModo("despensa"):onUpgrade()} style={{display:"flex",flexDirection:"column",alignItems:"flex-start",padding:"16px",borderRadius:20,border:`2px solid ${modo==="despensa"?T.sage:T.stonePale}`,background:modo==="despensa"?T.sagePale:T.warmWhite,cursor:"pointer",textAlign:"left",position:"relative"}}>
+          {!isPremium&&<span style={{position:"absolute",top:8,right:8,fontSize:10}}>🔒</span>}
+          <ShoppingBag size={20} color={T.sage} style={{marginBottom:8}}/><p style={{fontSize:13,fontWeight:700,color:T.brown,fontFamily:FB}}>Con mi despensa</p><p style={{fontSize:11,color:T.stone,marginTop:3,lineHeight:1.4}}>{isPremium?"Recetas con lo que ya tienes":"Premium"}</p>
         </button>
-        <button onClick={()=>setModo("fase")} style={{display:"flex",flexDirection:"column",alignItems:"flex-start",padding:"16px",borderRadius:20,border:`2px solid ${T.stonePale}`,background:T.warmWhite,cursor:"pointer",textAlign:"left"}}>
-          <Sparkles size={20} color={T.terra} style={{marginBottom:8}}/><p style={{fontSize:13,fontWeight:700,color:T.brown,fontFamily:FB}}>Por fase</p><p style={{fontSize:11,color:T.stone,marginTop:3,lineHeight:1.4}}>Según etapa del Método Eri</p>
+        <button onClick={()=>isPremium?setModo("fase"):onUpgrade()} style={{display:"flex",flexDirection:"column",alignItems:"flex-start",padding:"16px",borderRadius:20,border:`2px solid ${T.stonePale}`,background:T.warmWhite,cursor:"pointer",textAlign:"left",position:"relative"}}>
+          {!isPremium&&<span style={{position:"absolute",top:8,right:8,fontSize:10}}>🔒</span>}
+          <Sparkles size={20} color={T.terra} style={{marginBottom:8}}/><p style={{fontSize:13,fontWeight:700,color:T.brown,fontFamily:FB}}>Por fase</p><p style={{fontSize:11,color:T.stone,marginTop:3,lineHeight:1.4}}>{isPremium?"Según etapa del Método Eri":"Premium"}</p>
         </button>
       </div>
       <button onClick={()=>setModo("recetario")} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"16px 18px",borderRadius:20,border:`2px solid ${T.sageLight}`,background:T.sagePale,cursor:"pointer",marginBottom:20}}>
@@ -859,7 +1013,7 @@ function RecipesTab({state,dispatch}){
 }
 
 // ── PERFIL ────────────────────────────────────────────────────────────────────
-function ProfileTab({state,dispatch}){
+function ProfileTab({state,dispatch,isPremium,onUpgrade}){
   const {profile}=state;
   const [confirm,setConfirm]=useState(false);
   if(!profile)return null;
@@ -871,6 +1025,18 @@ function ProfileTab({state,dispatch}){
         <h2 style={{fontFamily:FD,fontSize:22,fontWeight:700,color:T.brown}}>{profile.nombre||"Tu perfil"}</h2>
         <span style={{fontSize:11,padding:"5px 14px",borderRadius:20,background:T.sagePale,color:T.sage,fontWeight:700,marginTop:6}}>Stop Hashimoto · Método Eri</span>
       </div>
+
+      {/* MEMBRESÍA */}
+      <div style={{borderRadius:20,background:isPremium?`linear-gradient(135deg,${T.terra}22,${T.terraLight}22)`:`linear-gradient(135deg,${T.stonePale},${T.cream})`,border:`1.5px solid ${isPremium?T.terra:T.stoneMid}`,padding:"16px",marginBottom:16}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <div>
+            <p style={{fontSize:11,fontWeight:700,color:isPremium?T.terra:T.stone,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:4}}>{isPremium?"✨ Plan Premium":"Plan Gratuito"}</p>
+            <p style={{fontSize:12,color:T.brownMid,lineHeight:1.5}}>{isPremium?"Acceso completo al Método Eri con IA":"Acceso limitado · 5 recetas"}</p>
+          </div>
+          {!isPremium&&<button onClick={onUpgrade} style={{padding:"9px 16px",borderRadius:12,border:"none",background:`linear-gradient(135deg,${T.terra},${T.terraLight})`,color:"white",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:FB,flexShrink:0,marginLeft:12}}>Upgrade →</button>}
+        </div>
+      </div>
+
       <div style={{borderRadius:20,overflow:"hidden",border:`1px solid ${T.stonePale}`,marginBottom:16}}>
         {rows.map(([k,v],i)=><div key={k} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"13px 16px",background:T.warmWhite,borderBottom:i<rows.length-1?`1px solid ${T.stonePale}`:"none"}}>
           <p style={{fontSize:11,fontWeight:700,color:T.stone,letterSpacing:"0.1em",textTransform:"uppercase"}}>{k}</p>
@@ -925,24 +1091,49 @@ export default function StopHashimoto(){
   const [state,dispatch]=useReducer(reducer,init);
   const [tab,setTab]=useState("home");
   const [ready,setReady]=useState(false);
+  const [membership,setMembershipState]=useState(null); // null=loading, {type:"free"|"premium"}
+  const [showPaywall,setShowPaywall]=useState(false);
+
   useEffect(()=>{
     (async()=>{
       try{
-        const [profile,pantry,recipes]=await Promise.all([dbGet("profile:user"),dbGet("pantry:items"),dbGet("history:recipes")]);
+        const [profile,pantry,recipes,mem]=await Promise.all([
+          dbGet("profile:user"),dbGet("pantry:items"),dbGet("history:recipes"),getMembership()
+        ]);
         dispatch({type:"LOAD",p:{profile:profile||null,pantry:pantry||[],recipesHistory:recipes||[],ticketsHistory:[]}});
+        setMembershipState(mem||null);
       }catch{}
       setReady(true);
     })();
   },[]);
+
   async function onboard(p){dispatch({type:"SET_PROFILE",p});await dbSet("profile:user",p);}
+
+  async function handleActivate(type){
+    const mem={type,activatedAt:Date.now()};
+    await setMembership(mem);
+    setMembershipState(mem);
+    setShowPaywall(false);
+  }
+
+  const isPremium=membership?.type==="premium";
+
   if(!ready)return<div style={{minHeight:"100svh",background:T.cream,display:"flex",alignItems:"center",justifyContent:"center"}}><Spin msg="Cargando Stop Hashimoto…"/></div>;
+
+  // Mostrar paywall si no tiene membresía aún
+  if(!membership)return<PaywallScreen onActivate={handleActivate}/>;
+
   if(!state.profile)return<Onboarding onDone={onboard}/>;
+
+  // Overlay de upgrade
+  if(showPaywall)return<PaywallScreen onActivate={handleActivate}/>;
+
   return(
     <div style={{minHeight:"100svh",background:T.cream,maxWidth:480,margin:"0 auto",position:"relative"}}>
-      {tab==="home"&&<HomeTab state={state} dispatch={dispatch} goTo={setTab}/>}
-      {tab==="pantry"&&<PantryTab state={state} dispatch={dispatch}/>}
-      {tab==="recipes"&&<RecipesTab state={state} dispatch={dispatch}/>}
-      {tab==="profile"&&<ProfileTab state={state} dispatch={dispatch}/>}
+      {tab==="home"&&<HomeTab state={state} dispatch={dispatch} goTo={setTab} isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
+      {tab==="pantry"&&<PantryTab state={state} dispatch={dispatch} isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
+      {tab==="recipes"&&<RecipesTab state={state} dispatch={dispatch} isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
+      {tab==="profile"&&<ProfileTab state={state} dispatch={dispatch} isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
       <TabBar active={tab} setActive={setTab}/>
     </div>
   );
