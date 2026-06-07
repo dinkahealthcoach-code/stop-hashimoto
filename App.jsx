@@ -20,8 +20,8 @@ const FREE_RECIPES_LIMIT = 3; // 3 recetas de almuerzo solamente
 const PREMIUM_RECIPES_PER_CAT = 2; // 2 recetas por categoría
 
 // ── MEMBERSHIP HELPERS ────────────────────────────────────────────────────────
-async function getMembership(){try{const r=await window.storage.get("membership:status",false);return r?JSON.parse(r.value):null;}catch{return null;}}
-async function setMembership(data){try{await window.storage.set("membership:status",JSON.stringify(data),false);}catch{}}
+async function getMembership(){try{const r=localStorage.getItem("membership:status");return r?JSON.parse(r):null;}catch{return null;}}
+async function setMembership(data){try{localStorage.setItem("membership:status",JSON.stringify(data));}catch{}}
 
 // ── PAYWALL SCREEN ────────────────────────────────────────────────────────────
 function PaywallScreen({onActivate}){
@@ -165,8 +165,8 @@ function reducer(state, action) {
     default: return state;
   }
 }
-async function dbGet(k){try{const r=await window.storage.get(k,false);return r?JSON.parse(r.value):null;}catch{return null;}}
-async function dbSet(k,v){try{await window.storage.set(k,JSON.stringify(v),false);}catch{}}
+async function dbGet(k){try{const r=localStorage.getItem(k);return r?JSON.parse(r):null;}catch{return null;}}
+async function dbSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
 
 // ── API ───────────────────────────────────────────────────────────────────────
 function pj(text){
@@ -1105,9 +1105,260 @@ function ProfileTab({state,dispatch,isPremium,onUpgrade}){
   );
 }
 
+// ── SÍNTOMAS DATA ─────────────────────────────────────────────────────────────
+const SINTOMAS_GRUPOS = [
+  {
+    grupo: "Tiroides & Hashimoto",
+    emoji: "🦋",
+    color: T.terra,
+    items: ["Fatiga extrema","Niebla mental","Caída de cabello","Sensación de frío","Aumento de peso","Estreñimiento","Piel seca","Voz ronca","Bradicardia","Depresión"]
+  },
+  {
+    grupo: "Autoinmunidad general",
+    emoji: "🛡️",
+    color: T.sage,
+    items: ["Dolor articular","Inflamación articular","Dolor muscular","Rigidez matutina","Erupciones cutáneas","Ojos secos","Boca seca","Sensibilidad al sol","Ganglios inflamados","Fiebre baja recurrente"]
+  },
+  {
+    grupo: "Digestión & Intestino",
+    emoji: "🌱",
+    color: T.ok,
+    items: ["Hinchazón abdominal","Gases","Diarrea","Reflujo","Náuseas","Intolerancia alimentaria","Dolor abdominal","Intestino irritable"]
+  },
+  {
+    grupo: "Energía & Sueño",
+    emoji: "⚡",
+    color: T.brownMid,
+    items: ["Insomnio","Sueño no reparador","Somnolencia diurna","Fatiga post-esfuerzo","Agotamiento mental","Falta de motivación"]
+  },
+  {
+    grupo: "Emocional & Cognitivo",
+    emoji: "🧠",
+    color: "#7B68EE",
+    items: ["Ansiedad","Irritabilidad","Pérdida de memoria","Dificultad de concentración","Cambios de humor","Sensación de despersonalización"]
+  }
+];
+
+const TODOS_SINTOMAS = SINTOMAS_GRUPOS.flatMap(g=>g.items);
+
+// ── SÍNTOMAS TAB ──────────────────────────────────────────────────────────────
+function SintomasTab({isPremium, onUpgrade}){
+  const [registros, setRegistros] = useState({});
+  const [hoy, setHoy] = useState(null);
+  const [selSintomas, setSelSintomas] = useState([]);
+  const [energia, setEnergia] = useState(5);
+  const [animo, setAnimo] = useState(5);
+  const [digestion, setDigestion] = useState(5);
+  const [notas, setNotas] = useState("");
+  const [vista, setVista] = useState("registro"); // registro | historial
+  const [guardado, setGuardado] = useState(false);
+  const [grupoAbierto, setGrupoAbierto] = useState(null);
+
+  const fechaHoy = new Date().toISOString().split("T")[0];
+
+  useEffect(()=>{
+    (async()=>{
+      try{
+        const data = await dbGet("sintomas:registros");
+        if(data){
+          setRegistros(data);
+          if(data[fechaHoy]){
+            const r = data[fechaHoy];
+            setHoy(r);
+            setSelSintomas(r.sintomas||[]);
+            setEnergia(r.energia||5);
+            setAnimo(r.animo||5);
+            setDigestion(r.digestion||5);
+            setNotas(r.notas||"");
+          }
+        }
+      }catch{}
+    })();
+  },[]);
+
+  async function guardar(){
+    const registro = {
+      fecha: fechaHoy,
+      sintomas: selSintomas,
+      energia, animo, digestion,
+      notas,
+      timestamp: Date.now()
+    };
+    const nuevo = {...registros, [fechaHoy]: registro};
+    setRegistros(nuevo);
+    setHoy(registro);
+    await dbSet("sintomas:registros", nuevo);
+    setGuardado(true);
+    setTimeout(()=>setGuardado(false), 2000);
+  }
+
+  function toggleSintoma(s){
+    setSelSintomas(prev=>prev.includes(s)?prev.filter(x=>x!==s):[...prev,s]);
+  }
+
+  // Últimos 7 días para el gráfico
+  const ultimos7 = Array.from({length:7},(_,i)=>{
+    const d = new Date();
+    d.setDate(d.getDate()-6+i);
+    const key = d.toISOString().split("T")[0];
+    const dia = d.toLocaleDateString("es-CL",{weekday:"short"}).slice(0,3);
+    return {key, dia, r: registros[key]||null};
+  });
+
+  const ScaleBtn = ({val, setVal, label, color})=>(
+    <div style={{marginBottom:16}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+        <span style={{fontSize:12,fontWeight:700,color:T.brown,fontFamily:FB}}>{label}</span>
+        <span style={{fontSize:16,fontWeight:800,color:color,fontFamily:FB}}>{val}/10</span>
+      </div>
+      <div style={{display:"flex",gap:4}}>
+        {Array.from({length:10},(_,i)=>i+1).map(n=>(
+          <button key={n} onClick={()=>setVal(n)} style={{flex:1,height:32,borderRadius:8,border:"none",background:n<=val?color:T.stonePale,cursor:"pointer",transition:"all .15s"}}/>
+        ))}
+      </div>
+      <div style={{display:"flex",justifyContent:"space-between",marginTop:4}}>
+        <span style={{fontSize:10,color:T.stone}}>Muy bajo</span>
+        <span style={{fontSize:10,color:T.stone}}>Excelente</span>
+      </div>
+    </div>
+  );
+
+  if(!isPremium) return(
+    <div style={{padding:"56px 20px 96px",fontFamily:FB}}>
+      <h2 style={{fontFamily:FD,fontSize:26,color:T.brown,fontWeight:700,marginBottom:4}}>Seguimiento de Síntomas</h2>
+      <p style={{fontSize:12,color:T.stone,marginBottom:24}}>Registra y visualiza tu evolución semana a semana</p>
+      <PremiumLock onUpgrade={onUpgrade}/>
+    </div>
+  );
+
+  return(
+    <div style={{padding:"56px 20px 96px",fontFamily:FB}}>
+      <h2 style={{fontFamily:FD,fontSize:26,color:T.brown,fontWeight:700,marginBottom:4}}>Seguimiento de Síntomas</h2>
+      <p style={{fontSize:12,color:T.stone,marginBottom:16}}>Registra cómo te sientes hoy</p>
+
+      {/* TABS */}
+      <div style={{display:"flex",background:T.stonePale,borderRadius:16,padding:4,marginBottom:20}}>
+        {[["registro","📝 Hoy"],["historial","📊 Mi semana"]].map(([id,label])=>(
+          <button key={id} onClick={()=>setVista(id)} style={{flex:1,padding:"10px",borderRadius:12,border:"none",background:vista===id?T.warmWhite:"transparent",color:vista===id?T.brown:T.stone,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:FB}}>{label}</button>
+        ))}
+      </div>
+
+      {vista==="registro"&&(
+        <>
+          {/* ESCALAS */}
+          <div style={{borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,padding:"20px",marginBottom:16}}>
+            <p style={{fontSize:11,fontWeight:700,color:T.stone,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:16}}>¿Cómo te sientes hoy?</p>
+            <ScaleBtn val={energia} setVal={setEnergia} label="⚡ Energía" color={T.sage}/>
+            <ScaleBtn val={animo} setVal={setAnimo} label="😊 Ánimo" color={T.terra}/>
+            <ScaleBtn val={digestion} setVal={setDigestion} label="🌱 Digestión" color={T.ok}/>
+          </div>
+
+          {/* SÍNTOMAS */}
+          <div style={{borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,padding:"20px",marginBottom:16}}>
+            <p style={{fontSize:11,fontWeight:700,color:T.stone,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:4}}>Síntomas de hoy</p>
+            <p style={{fontSize:11,color:T.stone,marginBottom:14}}>{selSintomas.length} seleccionados</p>
+            {SINTOMAS_GRUPOS.map(g=>(
+              <div key={g.grupo} style={{marginBottom:10}}>
+                <button onClick={()=>setGrupoAbierto(grupoAbierto===g.grupo?null:g.grupo)} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 14px",borderRadius:14,border:`1.5px solid ${grupoAbierto===g.grupo?g.color:T.stonePale}`,background:grupoAbierto===g.grupo?g.color+"11":T.cream,cursor:"pointer",fontFamily:FB}}>
+                  <span style={{fontSize:13,fontWeight:700,color:g.color}}>{g.emoji} {g.grupo}</span>
+                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                    {g.items.filter(s=>selSintomas.includes(s)).length>0&&<span style={{fontSize:11,padding:"2px 8px",borderRadius:10,background:g.color,color:"white",fontWeight:700}}>{g.items.filter(s=>selSintomas.includes(s)).length}</span>}
+                    <span style={{fontSize:12,color:T.stone}}>{grupoAbierto===g.grupo?"▲":"▼"}</span>
+                  </div>
+                </button>
+                {grupoAbierto===g.grupo&&(
+                  <div style={{display:"flex",flexWrap:"wrap",gap:8,padding:"12px 4px 4px"}}>
+                    {g.items.map(s=>{
+                      const sel=selSintomas.includes(s);
+                      return(
+                        <button key={s} onClick={()=>toggleSintoma(s)} style={{padding:"7px 12px",borderRadius:20,border:`1.5px solid ${sel?g.color:T.stoneMid}`,background:sel?g.color:T.warmWhite,color:sel?"white":T.brown,fontSize:12,fontWeight:sel?700:400,cursor:"pointer",fontFamily:FB,transition:"all .15s"}}>
+                          {sel?"✓ ":""}{s}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* NOTAS */}
+          <div style={{borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,padding:"20px",marginBottom:16}}>
+            <p style={{fontSize:11,fontWeight:700,color:T.stone,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:10}}>Notas del día (opcional)</p>
+            <textarea value={notas} onChange={e=>setNotas(e.target.value)} placeholder="¿Algo especial hoy? ¿Comiste algo diferente? ¿Dormiste mal?..." style={{width:"100%",padding:"12px",borderRadius:14,border:`1.5px solid ${T.stoneMid}`,background:T.cream,fontSize:13,color:T.ink,outline:"none",fontFamily:FB,resize:"none",minHeight:80,boxSizing:"border-box",lineHeight:1.6}}/>
+          </div>
+
+          <button onClick={guardar} style={{width:"100%",padding:"15px",borderRadius:20,border:"none",background:guardado?T.ok:`linear-gradient(135deg,${T.sage},${T.sageMid})`,color:"white",fontSize:14,fontWeight:700,cursor:"pointer",fontFamily:FB,boxShadow:`0 8px 24px ${T.sage}44`,transition:"all .3s"}}>
+            {guardado?"✓ Guardado":"Guardar registro de hoy"}
+          </button>
+        </>
+      )}
+
+      {vista==="historial"&&(
+        <>
+          {/* GRÁFICO SEMANAL */}
+          <div style={{borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,padding:"20px",marginBottom:16}}>
+            <p style={{fontSize:11,fontWeight:700,color:T.stone,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:16}}>Últimos 7 días</p>
+            <div style={{display:"flex",gap:6,alignItems:"flex-end",height:120,marginBottom:12}}>
+              {ultimos7.map(({key,dia,r})=>{
+                const promedio=r?Math.round((r.energia+r.animo+r.digestion)/3):0;
+                const alto=promedio>0?(promedio/10)*100:0;
+                const esHoy=key===fechaHoy;
+                return(
+                  <div key={key} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
+                    {r&&<span style={{fontSize:9,color:T.stone,fontWeight:700}}>{promedio}</span>}
+                    <div style={{width:"100%",borderRadius:8,background:r?(esHoy?T.terra:T.sage):T.stonePale,height:`${Math.max(alto,r?8:4)}%`,minHeight:r?8:4,transition:"height .3s"}}/>
+                    <span style={{fontSize:10,color:esHoy?T.terra:T.stone,fontWeight:esHoy?700:400,fontFamily:FB}}>{dia}</span>
+                    {r&&<span style={{fontSize:8,color:T.stone}}>{r.sintomas?.length||0}s</span>}
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{display:"flex",gap:12,justifyContent:"center"}}>
+              {[["Energía",T.sage],[" Ánimo",T.terra],["Digestión",T.ok]].map(([l,c])=>(
+                <div key={l} style={{display:"flex",alignItems:"center",gap:4}}><div style={{width:8,height:8,borderRadius:"50%",background:c}}/><span style={{fontSize:10,color:T.stone}}>{l}</span></div>
+              ))}
+            </div>
+          </div>
+
+          {/* HISTORIAL DE REGISTROS */}
+          {ultimos7.filter(d=>d.r).length===0?(
+            <div style={{textAlign:"center",padding:"40px 16px",color:T.stone}}>
+              <p style={{fontSize:32,marginBottom:8}}>📋</p>
+              <p style={{fontSize:13}}>Aún no hay registros esta semana. ¡Empieza hoy!</p>
+            </div>
+          ):ultimos7.filter(d=>d.r).reverse().map(({key,dia,r})=>(
+            <div key={key} style={{borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,padding:"16px",marginBottom:10}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+                <p style={{fontSize:13,fontWeight:700,color:T.brown}}>{key===fechaHoy?"Hoy":new Date(key+"T12:00:00").toLocaleDateString("es-CL",{weekday:"long",day:"numeric",month:"short"})}</p>
+                <span style={{fontSize:11,padding:"4px 10px",borderRadius:10,background:T.sagePale,color:T.sage,fontWeight:700}}>Prom: {Math.round((r.energia+r.animo+r.digestion)/3)}/10</span>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:10}}>
+                {[["⚡",r.energia,T.sage],["😊",r.animo,T.terra],["🌱",r.digestion,T.ok]].map(([em,val,c])=>(
+                  <div key={em} style={{textAlign:"center",padding:"8px",borderRadius:12,background:c+"11"}}>
+                    <p style={{fontSize:16}}>{em}</p>
+                    <p style={{fontSize:16,fontWeight:800,color:c,fontFamily:FD}}>{val}</p>
+                  </div>
+                ))}
+              </div>
+              {r.sintomas?.length>0&&(
+                <div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:r.notas?8:0}}>
+                  {r.sintomas.slice(0,5).map(s=><span key={s} style={{fontSize:10,padding:"3px 8px",borderRadius:8,background:T.terraPale,color:T.terra,fontWeight:600}}>{s}</span>)}
+                  {r.sintomas.length>5&&<span style={{fontSize:10,padding:"3px 8px",borderRadius:8,background:T.stonePale,color:T.stone}}>+{r.sintomas.length-5} más</span>}
+                </div>
+              )}
+              {r.notas&&<p style={{fontSize:11,color:T.stone,fontStyle:"italic",lineHeight:1.5}}>"{r.notas}"</p>}
+            </div>
+          ))}
+        </>
+      )}
+    </div>
+  );
+}
+
 // ── TAB BAR ───────────────────────────────────────────────────────────────────
 function TabBar({active,setActive}){
-  const tabs=[{id:"home",Icon:Heart,label:"Inicio"},{id:"pantry",Icon:ShoppingBag,label:"Despensa"},{id:"recipes",Icon:ChefHat,label:"Recetas"},{id:"profile",Icon:User,label:"Perfil"}];
+  const tabs=[{id:"home",Icon:Heart,label:"Inicio"},{id:"pantry",Icon:ShoppingBag,label:"Despensa"},{id:"recipes",Icon:ChefHat,label:"Recetas"},{id:"sintomas",Icon:AlertCircle,label:"Síntomas"},{id:"profile",Icon:User,label:"Perfil"}];
   return(
     <nav style={{position:"fixed",bottom:0,left:0,right:0,zIndex:100,background:T.warmWhite,borderTop:`1px solid ${T.stonePale}`,display:"flex",justifyContent:"space-around",paddingTop:10,paddingBottom:"max(env(safe-area-inset-bottom),14px)"}}>
       {tabs.map(({id,Icon,label})=>{
@@ -1172,6 +1423,7 @@ export default function StopHashimoto(){
       {tab==="home"&&<HomeTab state={state} dispatch={dispatch} goTo={setTab} isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
       {tab==="pantry"&&<PantryTab state={state} dispatch={dispatch} isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
       {tab==="recipes"&&<RecipesTab state={state} dispatch={dispatch} isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
+      {tab==="sintomas"&&<SintomasTab isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
       {tab==="profile"&&<ProfileTab state={state} dispatch={dispatch} isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
       <TabBar active={tab} setActive={setTab}/>
     </div>
