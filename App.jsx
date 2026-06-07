@@ -16,8 +16,8 @@ const FB = `'Trebuchet MS', 'Century Gothic', sans-serif`;
 // ── LEMON SQUEEZY CONFIG ─────────────────────────────────────────────────────
 const LS_PREMIUM_URL = "https://stophashimoto.lemonsqueezy.com/checkout/buy/6ba9043a-2389-49a2-b361-862b0702869f";
 const LS_ALUMNAS_URL = "https://stophashimoto.lemonsqueezy.com/checkout/buy/757e5d80-a898-4648-a04a-f85b1697bcbc";
-const FREE_RECIPES_LIMIT = 1; // 1 receta por categoría
-const PREMIUM_RECIPES_LIMIT = 10; // 10 recetas en total
+const FREE_RECIPES_LIMIT = 3; // 3 recetas de almuerzo solamente
+const PREMIUM_RECIPES_PER_CAT = 2; // 2 recetas por categoría
 
 // ── MEMBERSHIP HELPERS ────────────────────────────────────────────────────────
 async function getMembership(){try{const r=await window.storage.get("membership:status",false);return r?JSON.parse(r.value):null;}catch{return null;}}
@@ -68,7 +68,7 @@ function PaywallScreen({onActivate}){
               <div><p style={{fontSize:14,fontWeight:700,color:"white",marginBottom:2}}>Plan Gratuito</p><p style={{fontSize:11,color:"rgba(255,255,255,0.5)"}}>Sin tarjeta requerida</p></div>
               <span style={{fontSize:20,fontWeight:800,color:"rgba(255,255,255,0.4)"}}>$0</span>
             </div>
-            {["1 receta por categoría del Método Eri","Guía de fases AIP","Consejo del día"].map(f=>(
+            {["3 recetas de almuerzo del Método Eri","Agregar ingredientes a mano","Guía de fases AIP"].map(f=>(
               <div key={f} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
                 <CheckCircle size={12} color="rgba(255,255,255,0.3)"/>
                 <span style={{fontSize:12,color:"rgba(255,255,255,0.5)"}}>{f}</span>
@@ -584,7 +584,24 @@ function PantryTab({state,dispatch,isPremium,onUpgrade}){
   const [err,setErr]=useState(null);
   const [filter,setFilter]=useState("all");
   const [showEtiqueta,setShowEtiqueta]=useState(false);
+  const [showManual,setShowManual]=useState(false);
+  const [manualName,setManualName]=useState("");
+  const [manualQty,setManualQty]=useState("1");
+  const [manualUnit,setManualUnit]=useState("unidad");
+  const [manualCat,setManualCat]=useState("otro");
   const fileRef=useRef();
+
+  async function handleManualAdd(){
+    if(!manualName.trim()){return;}
+    const item={name:manualName.trim(),quantity:parseFloat(manualQty)||1,unit:manualUnit,category:manualCat};
+    dispatch({type:"MERGE_PANTRY",p:[item]});
+    const next=[...pantry];
+    const idx=next.findIndex(i=>i.name.toLowerCase()===item.name.toLowerCase());
+    idx>=0?(next[idx]={...next[idx],quantity:(next[idx].quantity||0)+item.quantity}):next.push(item);
+    await dbSet("pantry:items",next);
+    setManualName("");setManualQty("1");setManualUnit("unidad");setManualCat("otro");
+    setShowManual(false);
+  }
   async function handleFile(e){
     const file=e.target.files?.[0];if(!file)return;
     setLoading(true);setErr(null);
@@ -611,7 +628,7 @@ Responde ÚNICAMENTE con este JSON sin ningún texto antes o después:
     <div style={{padding:"56px 20px 96px",fontFamily:FB}}>
       <h2 style={{fontFamily:FD,fontSize:26,color:T.brown,fontWeight:700,marginBottom:4}}>Despensa Método Eri</h2>
       <p style={{fontSize:12,color:T.stone,marginBottom:16}}>{pantry.length} ingredientes disponibles</p>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
         <label style={{display:"block"}} onClick={!isPremium?e=>{e.preventDefault();onUpgrade();}:undefined}>
           <input ref={fileRef} type="file" accept="image/*" capture="environment" style={{display:"none"}} onChange={isPremium?handleFile:undefined}/>
           <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:6,padding:"16px 10px",borderRadius:20,background:isPremium?`linear-gradient(135deg,${T.terra},${T.terraLight})`:`linear-gradient(135deg,${T.stoneMid},${T.stone})`,cursor:"pointer",boxShadow:isPremium?`0 6px 20px ${T.terra}44`:"none",textAlign:"center",position:"relative"}}>
@@ -628,6 +645,36 @@ Responde ÚNICAMENTE con este JSON sin ningún texto antes o después:
           <span style={{fontSize:10,color:"rgba(255,255,255,0.75)"}}>{isPremium?"¿Es apto AIP?":"Premium"}</span>
         </button>
       </div>
+
+      {/* BOTÓN AGREGAR A MANO — disponible para todos */}
+      <button onClick={()=>setShowManual(true)} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"center",gap:8,padding:"13px",borderRadius:20,border:`1.5px dashed ${T.sage}`,background:T.sagePale,cursor:"pointer",marginBottom:16,fontFamily:FB}}>
+        <span style={{fontSize:16}}>✏️</span>
+        <span style={{fontSize:13,fontWeight:700,color:T.sage}}>Agregar ingrediente a mano</span>
+      </button>
+
+      {/* MODAL AGREGAR A MANO */}
+      {showManual&&(
+        <div style={{position:"fixed",inset:0,zIndex:200,background:"rgba(44,32,24,0.6)",display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={()=>setShowManual(false)}>
+          <div onClick={e=>e.stopPropagation()} style={{width:"100%",maxWidth:480,borderRadius:"28px 28px 0 0",background:T.cream,padding:"24px 20px 40px",fontFamily:FB}}>
+            <div style={{display:"flex",justifyContent:"center",marginBottom:16}}><div style={{width:40,height:4,borderRadius:2,background:T.stoneMid}}/></div>
+            <h3 style={{fontFamily:FD,fontSize:18,color:T.brown,fontWeight:700,marginBottom:16}}>Agregar ingrediente</h3>
+            <input value={manualName} onChange={e=>setManualName(e.target.value)} placeholder="Nombre del ingrediente..." style={{width:"100%",padding:"13px 16px",borderRadius:14,border:`1.5px solid ${T.stoneMid}`,background:T.warmWhite,fontSize:14,color:T.ink,outline:"none",boxSizing:"border-box",fontFamily:FB,marginBottom:10}}/>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+              <input value={manualQty} onChange={e=>setManualQty(e.target.value)} type="number" min="0.1" step="0.1" placeholder="Cantidad" style={{padding:"13px 16px",borderRadius:14,border:`1.5px solid ${T.stoneMid}`,background:T.warmWhite,fontSize:14,color:T.ink,outline:"none",fontFamily:FB}}/>
+              <select value={manualUnit} onChange={e=>setManualUnit(e.target.value)} style={{padding:"13px 16px",borderRadius:14,border:`1.5px solid ${T.stoneMid}`,background:T.warmWhite,fontSize:14,color:T.ink,outline:"none",fontFamily:FB}}>
+                {["unidad","g","kg","ml","l","taza","cda","cdita"].map(u=><option key={u} value={u}>{u}</option>)}
+              </select>
+            </div>
+            <select value={manualCat} onChange={e=>setManualCat(e.target.value)} style={{width:"100%",padding:"13px 16px",borderRadius:14,border:`1.5px solid ${T.stoneMid}`,background:T.warmWhite,fontSize:14,color:T.ink,outline:"none",fontFamily:FB,marginBottom:16,boxSizing:"border-box"}}>
+              {Object.entries(CATS).map(([k,v])=><option key={k} value={k}>{v.emoji} {v.label}</option>)}
+            </select>
+            <button onClick={handleManualAdd} disabled={!manualName.trim()} style={{width:"100%",padding:"14px",borderRadius:16,border:"none",background:manualName.trim()?`linear-gradient(135deg,${T.sage},${T.sageMid})`:`${T.stoneMid}`,color:"white",fontSize:14,fontWeight:700,cursor:manualName.trim()?"pointer":"not-allowed",fontFamily:FB}}>
+              Agregar a despensa ✓
+            </button>
+          </div>
+        </div>
+      )}
+
       {loading&&<Spin msg="Identificando alimentos en tu despensa…"/>}
       {err&&<Err msg={err} onClose={()=>setErr(null)}/>}
       {pantry.length>0&&<div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:8,marginBottom:14}}>
@@ -637,7 +684,7 @@ Responde ÚNICAMENTE con este JSON sin ningún texto antes o después:
           </button>
         ))}
       </div>}
-      {pantry.length===0?<Empty Icon={ShoppingBag} title="Tu despensa está vacía" sub="Fotografía tu despensa o tus alimentos y los registraré automáticamente."/>
+      {pantry.length===0?<Empty Icon={ShoppingBag} title="Tu despensa está vacía" sub="Fotografía tu despensa o agrega ingredientes a mano."/>
        :visible.length===0?<Empty Icon={Soup} title="Nada en esta categoría" sub="Prueba otro filtro."/>
        :visible.map((item,i)=>{
         const c=CATS[item.category]||CATS.otro;
@@ -746,17 +793,18 @@ function RecetarioSH({onBack,perfilFase,isPremium,onUpgrade}){
     (cat==="todos"||r.cat===cat)&&
     (q===""||r.titulo.toLowerCase().includes(q.toLowerCase())||r.ing.some(i=>i.toLowerCase().includes(q.toLowerCase())))
   );
-  // Free: 1 receta por categoría. Premium: 10 recetas en total
+  // Free: solo 3 recetas de almuerzo. Premium: 2 por categoría
   let filtradas;
   if(isPremium){
-    filtradas=todasFiltradas.slice(0,PREMIUM_RECIPES_LIMIT);
-  } else {
-    const vistas=new Set();
+    const porCat={};
     filtradas=todasFiltradas.filter(r=>{
-      if(vistas.has(r.cat))return false;
-      vistas.add(r.cat);
+      porCat[r.cat]=(porCat[r.cat]||0);
+      if(porCat[r.cat]>=PREMIUM_RECIPES_PER_CAT)return false;
+      porCat[r.cat]++;
       return true;
     });
+  } else {
+    filtradas=RECETARIO.filter(r=>r.cat==="almuerzo"&&r.fases.includes(fase)).slice(0,FREE_RECIPES_LIMIT);
   }
   return(
     <div style={{padding:"20px 20px 96px",fontFamily:FB}}>
@@ -784,7 +832,8 @@ function RecetarioSH({onBack,perfilFase,isPremium,onUpgrade}){
       <div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:10,marginBottom:16}}>
         {CATS_R.map(c=><button key={c.id} onClick={()=>setCat(c.id)} style={{flexShrink:0,padding:"7px 14px",borderRadius:20,border:`1.5px solid ${cat===c.id?T.sage:T.stoneMid}`,background:cat===c.id?T.sage:"white",color:cat===c.id?"white":T.brown,fontSize:12,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",fontFamily:FB}}>{c.emoji} {c.label}</button>)}
       </div>
-      <p style={{fontSize:11,color:T.stone,marginBottom:12}}>{filtradas.length} receta{filtradas.length!==1?"s":""} para {fase}{!isPremium?" (gratuito: 1 por categoría)":` (premium: hasta ${PREMIUM_RECIPES_LIMIT})`}</p>
+      <p style={{fontSize:11,color:T.stone,marginBottom:12}}>{filtradas.length} receta{filtradas.length!==1?"s":""}{!isPremium?" · plan gratuito: 3 almuerzos":` · plan premium: ${PREMIUM_RECIPES_PER_CAT} por categoría`}</p>
+      {!isPremium&&<div style={{marginBottom:12,padding:"10px 14px",borderRadius:14,background:T.terraPale,border:`1px solid ${T.terra}33`}}><p style={{fontSize:12,color:T.terra,lineHeight:1.5}}>🔒 Acceso gratuito: solo recetas de almuerzo. Suscríbete para ver todas las categorías.</p></div>}
       {filtradas.length===0?<div style={{textAlign:"center",padding:"40px 16px",color:T.stone,fontSize:13}}>No encontré recetas con ese término 🌿</div>
        :filtradas.map(r=>(
         <button key={r.id} onClick={()=>setAbierta(r)} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 16px",borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,marginBottom:10,cursor:"pointer",textAlign:"left"}}>
@@ -803,7 +852,7 @@ function RecetarioSH({onBack,perfilFase,isPremium,onUpgrade}){
         </button>
        ))}
       {!isPremium&&<PremiumLock onUpgrade={onUpgrade}/>}
-      {isPremium&&todasFiltradas.length>PREMIUM_RECIPES_LIMIT&&<div style={{margin:"16px 0",padding:"14px",borderRadius:16,background:T.sagePale,border:`1px solid ${T.sageLight}`,textAlign:"center"}}><p style={{fontSize:12,color:T.sage}}>Plan Premium incluye {PREMIUM_RECIPES_LIMIT} recetas por fase 🌿</p></div>}
+      {isPremium&&<div style={{margin:"16px 0",padding:"14px",borderRadius:16,background:T.sagePale,border:`1px solid ${T.sageLight}`,textAlign:"center"}}><p style={{fontSize:12,color:T.sage}}>Plan Premium · {PREMIUM_RECIPES_PER_CAT} recetas por categoría 🌿</p></div>}
       {abierta&&<RecetaModal receta={abierta} onClose={()=>setAbierta(null)}/>}
     </div>
   );
