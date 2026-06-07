@@ -102,6 +102,9 @@ function PaywallScreen({onActivate}){
             <button onClick={()=>window.open(LS_PREMIUM_URL,"_blank")} style={{width:"100%",marginTop:16,padding:"14px",borderRadius:14,border:"none",background:"white",color:T.terra,fontSize:14,fontWeight:800,cursor:"pointer",fontFamily:FB,boxShadow:"0 4px 16px rgba(0,0,0,0.15)"}}>
               Suscribirme ahora →
             </button>
+            <p style={{fontSize:11,color:"rgba(255,255,255,0.55)",textAlign:"center",marginTop:10,lineHeight:1.6}}>
+              ¿Ya eres alumna del programa Stop Hashimoto®?{"\n"}Usa tu <b style={{color:"rgba(255,255,255,0.8)"}}>link exclusivo de alumnas</b> que recibiste por WhatsApp — tiene precio especial y 1 mes gratis.
+            </p>
           </div>
 
         </div>
