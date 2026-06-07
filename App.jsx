@@ -417,6 +417,268 @@ function Onboarding({onDone}){
   );
 }
 
+// ── BIENESTAR DATA ────────────────────────────────────────────────────────────
+const CONSEJOS_ERI = [
+  "Mastica cada bocado al menos 20 veces. La digestión empieza en la boca y un intestino sano es la base de tu sistema inmune.",
+  "Elimina el gluten por completo — no hay 'poquito'. Una sola exposición puede activar anticuerpos por 3 a 6 meses.",
+  "Duerme entre 7 y 9 horas. El cortisol nocturno alto agrava la inflamación tiroidea más que cualquier alimento.",
+  "Come en un ambiente tranquilo, sin pantallas. El estrés activa el sistema nervioso simpático e inhibe la digestión.",
+  "Incluye caldo de huesos 3 veces por semana. El colágeno repara el intestino permeable que alimenta la autoinmunidad.",
+  "Prioriza proteína en el desayuno. Estabiliza el azúcar en sangre y reduce el cortisol de la mañana.",
+  "Saca el aceite de girasol, maíz y canola de tu cocina. Son proinflamatorios y dañan la membrana de tus células.",
+  "El selenio es tu mejor aliado. Reduce los anticuerpos TPO y mejora la conversión de T4 a T3.",
+  "Muévete, pero no en exceso. El ejercicio intenso sin recuperación eleva el cortisol y empeora la autoinmunidad.",
+  "Exponte al sol 15 minutos al día. La vitamina D3 regula directamente el sistema inmune y reduce la inflamación.",
+  "Hidratate con agua filtrada. El cloro del agua del grifo puede interferir con la absorción del yodo tiroideo.",
+  "Come con el ritmo de tu cuerpo. Los ayunos prolongados sin preparación estresan las glándulas suprarrenales.",
+  "Reduce el azúcar al mínimo. Alimenta las bacterias dañinas del intestino y activa cascadas inflamatorias.",
+  "Practica la gratitud cada mañana. Modula el eje HPA (estrés-cortisol-tiroides) de forma directa.",
+  "El magnesio por la noche mejora el sueño, relaja los músculos y apoya más de 300 reacciones enzimáticas.",
+  "Limita el café a 1 taza antes del mediodía. La cafeína en exceso eleva el cortisol y agota las suprarrenales.",
+  "Reintroduce alimentos de uno en uno. Espera 5 días entre cada uno para identificar reacciones sin confusión.",
+  "La conexión social reduce la inflamación. El aislamiento crónico eleva las citoquinas proinflamatorias.",
+  "Lava bien las frutas y verduras. Los pesticidas actúan como disruptores endocrinos y afectan la tiroides.",
+  "Cocina con cúrcuma y pimienta negra juntas. La piperina aumenta la absorción de curcumina hasta un 2.000%.",
+  "Evita comer frente a pantallas. El sistema nervioso debe estar en modo 'descanso y digestión', no en alerta.",
+  "El aceite de coco en ayunas nutre el intestino y aporta energía sin subir el azúcar en sangre.",
+  "Cuida tus dientes — la salud bucal está directamente conectada con la inflamación sistémica.",
+  "Descansa activamente: caminar en la naturaleza baja el cortisol más eficazmente que el ejercicio intenso.",
+  "La respiración profunda activa el nervio vago y apaga la respuesta inflamatoria en minutos.",
+  "Baña con agua fría los últimos 30 segundos. Activa el sistema linfático y reduce la inflamación.",
+  "Planifica tus comidas con anticipación. Las decisiones de alimentos bajo estrés siempre son las peores.",
+  "El zinc con comida evita náuseas y mejora la función tiroidea e inmune a la vez.",
+  "Respira antes de comer. 3 respiraciones profundas activan las enzimas digestivas y calman el sistema nervioso.",
+  "Tu microbioma influye en tus anticuerpos tiroideos. Cuida tu intestino como tu órgano inmune principal.",
+];
+
+const AFIRMACIONES = [
+  "Mi cuerpo sana cada día con cada decisión consciente que tomo.",
+  "Escojo alimentos que me nutren y me acercan a mi mejor versión.",
+  "Mi sistema inmune vuelve al equilibrio. Estoy en el camino correcto.",
+  "Confío en el proceso de sanación. Cada día es un paso adelante.",
+  "Merezco salud, energía y bienestar. Lo estoy construyendo hoy.",
+  "Mi cuerpo no es mi enemigo — es mi aliado que pide atención y amor.",
+  "Cada comida es una oportunidad de reducir la inflamación y sanar.",
+  "La paciencia es parte de mi protocolo. La salud profunda toma tiempo.",
+  "Soy más fuerte que cualquier diagnóstico. Estoy a cargo de mi salud.",
+  "Mi intestino sana, mis anticuerpos bajan, mi energía regresa.",
+  "Elijo el descanso sin culpa — es parte esencial de mi recuperación.",
+  "Agradezco a mi cuerpo por seguir funcionando mientras sana.",
+  "Cada síntoma que mejora es evidencia de que el Método Eri funciona.",
+  "Estoy presente en mi proceso de sanación, sin prisa ni comparaciones.",
+  "Me permito descansar, nutrirme y cuidarme — es mi trabajo más importante.",
+  "La inflamación disminuye cada vez que elijo alimentos que me respetan.",
+  "Tengo la información, la guía y la voluntad para sanar desde la raíz.",
+  "Mi tiroides recibe apoyo hoy — a través del alimento, el sueño y la calma.",
+  "Soy una persona que se cuida. Eso es suficiente y es poderoso.",
+  "Cada pequeña mejora cuenta. No necesito ser perfecta para sanar.",
+];
+
+const INTENCIONES = [
+  "Hoy me enfoco en masticar despacio y comer con consciencia.",
+  "Hoy elijo descansar sin culpa cuando mi cuerpo lo necesite.",
+  "Hoy preparo mis comidas con amor y atención.",
+  "Hoy bebo suficiente agua y agradezco a mi cuerpo.",
+  "Hoy me muevo con suavidad y escucho mis límites.",
+  "Hoy evito el gluten con convicción, sabiendo que me sana.",
+  "Hoy practico la paciencia con mi proceso de recuperación.",
+  "Hoy me permito pedir ayuda si la necesito.",
+  "Hoy observo mis síntomas sin juicio y con curiosidad.",
+  "Hoy incluyo un alimento antiinflamatorio en cada comida.",
+  "Hoy me alejo de lo que me genera estrés innecesario.",
+  "Hoy celebro un pequeño avance en mi salud.",
+  "Hoy me conecto con personas que me nutren emocionalmente.",
+  "Hoy duermo a tiempo para apoyar mi tiroides y suprarrenales.",
+  "Hoy recuerdo que sanar no es lineal — los altibajos son parte del proceso.",
+];
+
+const HABITOS_ERI = [
+  {id:"agua", emoji:"💧", texto:"Tomé 8 vasos de agua"},
+  {id:"gluten", emoji:"🚫", texto:"Sin gluten hoy"},
+  {id:"proteina", emoji:"🥩", texto:"Proteína en el desayuno"},
+  {id:"suplementos", emoji:"💊", texto:"Tomé mis suplementos"},
+  {id:"movimiento", emoji:"🚶‍♀️", texto:"Me moví suavemente (caminata, yoga, stretching)"},
+  {id:"sueno", emoji:"😴", texto:"Dormí más de 7 horas"},
+  {id:"estres", emoji:"🧘‍♀️", texto:"Practiqué algo para el estrés (respiración, meditación)"},
+  {id:"procesados", emoji:"🍫", texto:"Evité ultraprocesados y azúcar"},
+  {id:"sol", emoji:"☀️", texto:"Me expuse al sol al menos 15 minutos"},
+  {id:"gratitud", emoji:"🌸", texto:"Practiqué gratitud o escribí en mi diario"},
+];
+
+// ── RESPIRACIÓN 4-7-8 ─────────────────────────────────────────────────────────
+function Respiracion478(){
+  const [fase, setFase] = useState(null); // null | "inhala" | "sostén" | "exhala" | "fin"
+  const [cuenta, setCuenta] = useState(0);
+  const [ciclo, setCiclo] = useState(0);
+  const CICLOS = 3;
+
+  useEffect(()=>{
+    if(!fase||fase==="fin")return;
+    const duraciones = {"inhala":4,"sostén":7,"exhala":8};
+    const dur = duraciones[fase];
+    if(cuenta>=dur){
+      if(fase==="inhala") setFase("sostén");
+      else if(fase==="sostén") setFase("exhala");
+      else if(fase==="exhala"){
+        const nuevoCiclo = ciclo+1;
+        if(nuevoCiclo>=CICLOS){setFase("fin");setCiclo(0);}
+        else{setCiclo(nuevoCiclo);setFase("inhala");}
+      }
+      setCuenta(0);
+      return;
+    }
+    const t=setTimeout(()=>setCuenta(c=>c+1),1000);
+    return()=>clearTimeout(t);
+  },[fase,cuenta]);
+
+  const config={
+    "inhala":{label:"Inhala",color:T.sage,dur:4,desc:"Por la nariz, lento y profundo"},
+    "sostén":{label:"Sostén",color:T.terra,dur:7,desc:"Retén el aire suavemente"},
+    "exhala":{label:"Exhala",color:"#5B8DB8",dur:8,desc:"Por la boca, completamente"},
+  };
+  const actual = fase&&fase!=="fin"?config[fase]:null;
+  const pct = actual?Math.round((cuenta/actual.dur)*100):0;
+
+  if(!fase) return(
+    <div style={{borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,padding:"20px",marginBottom:12}}>
+      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
+        <span style={{fontSize:20}}>🌬️</span>
+        <div>
+          <p style={{fontSize:13,fontWeight:700,color:T.brown,fontFamily:FB}}>Respiración 4-7-8</p>
+          <p style={{fontSize:11,color:T.stone}}>Calma el sistema nervioso en 3 ciclos</p>
+        </div>
+      </div>
+      <button onClick={()=>{setFase("inhala");setCuenta(0);setCiclo(0);}} style={{width:"100%",padding:"12px",borderRadius:14,border:"none",background:`linear-gradient(135deg,${T.sage},${T.sageMid})`,color:"white",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:FB}}>
+        Iniciar respiración →
+      </button>
+    </div>
+  );
+
+  if(fase==="fin") return(
+    <div style={{borderRadius:20,background:T.sagePale,border:`1px solid ${T.sageLight}`,padding:"20px",marginBottom:12,textAlign:"center"}}>
+      <p style={{fontSize:28,marginBottom:8}}>✨</p>
+      <p style={{fontFamily:FD,fontSize:16,fontWeight:700,color:T.sage,marginBottom:4}}>Completado</p>
+      <p style={{fontSize:12,color:T.sage,marginBottom:14}}>Tu sistema nervioso está más calmado. Bien hecho.</p>
+      <button onClick={()=>setFase(null)} style={{padding:"10px 24px",borderRadius:14,border:`1px solid ${T.sage}`,background:"transparent",color:T.sage,fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:FB}}>Repetir</button>
+    </div>
+  );
+
+  return(
+    <div style={{borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,padding:"20px",marginBottom:12}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+        <span style={{fontSize:12,fontWeight:700,color:T.stone,fontFamily:FB}}>🌬️ Respiración 4-7-8</span>
+        <span style={{fontSize:11,color:T.stone}}>Ciclo {ciclo+1}/{CICLOS}</span>
+      </div>
+      <div style={{display:"flex",flexDirection:"column",alignItems:"center",marginBottom:16}}>
+        <div style={{width:120,height:120,borderRadius:"50%",background:`${actual.color}15`,border:`4px solid ${actual.color}`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",marginBottom:12,position:"relative"}}>
+          <div style={{position:"absolute",inset:4,borderRadius:"50%",background:`conic-gradient(${actual.color} ${pct*3.6}deg, transparent 0deg)`,opacity:0.2}}/>
+          <p style={{fontFamily:FD,fontSize:32,fontWeight:700,color:actual.color,lineHeight:1}}>{actual.dur-cuenta}</p>
+          <p style={{fontSize:11,color:actual.color,fontWeight:700}}>{actual.label}</p>
+        </div>
+        <p style={{fontSize:12,color:T.stone,textAlign:"center"}}>{actual.desc}</p>
+      </div>
+      <div style={{display:"flex",gap:6,justifyContent:"center"}}>
+        {["inhala","sostén","exhala"].map(f=>(
+          <div key={f} style={{flex:1,height:4,borderRadius:2,background:fase===f?actual.color:T.stonePale,transition:"background .3s"}}/>
+        ))}
+      </div>
+      <button onClick={()=>setFase(null)} style={{width:"100%",marginTop:14,padding:"10px",borderRadius:12,border:`1px solid ${T.stoneMid}`,background:"transparent",color:T.stone,fontSize:12,cursor:"pointer",fontFamily:FB}}>Detener</button>
+    </div>
+  );
+}
+
+// ── HOME BIENESTAR SECTION ────────────────────────────────────────────────────
+function BienestarSection(){
+  const hoy = new Date();
+  const diaDelAno = Math.floor((hoy - new Date(hoy.getFullYear(),0,0))/(1000*60*60*24));
+  const consejo = CONSEJOS_ERI[diaDelAno % CONSEJOS_ERI.length];
+  const afirmacion = AFIRMACIONES[diaDelAno % AFIRMACIONES.length];
+  const intencion = INTENCIONES[diaDelAno % INTENCIONES.length];
+  const fechaKey = hoy.toISOString().split("T")[0];
+
+  const [habitos, setHabitos] = useState({});
+  const [showRespiracion, setShowRespiracion] = useState(false);
+  const [expandConsejo, setExpandConsejo] = useState(false);
+
+  useEffect(()=>{
+    try{
+      const h=JSON.parse(localStorage.getItem("habitos:hoy")||"{}");
+      if(h.fecha===fechaKey) setHabitos(h.checks||{});
+    }catch{}
+  },[]);
+
+  function toggleHabito(id){
+    const nuevo={...habitos,[id]:!habitos[id]};
+    setHabitos(nuevo);
+    localStorage.setItem("habitos:hoy",JSON.stringify({fecha:fechaKey,checks:nuevo}));
+  }
+
+  const completados=Object.values(habitos).filter(Boolean).length;
+
+  return(
+    <>
+      {/* INTENCIÓN DEL DÍA */}
+      <div style={{borderRadius:20,background:`linear-gradient(135deg,${T.terra}22,${T.terraLight}22)`,border:`1px solid ${T.terra}33`,padding:"18px",marginBottom:12}}>
+        <p style={{fontSize:10,fontWeight:700,color:T.terra,letterSpacing:"0.16em",textTransform:"uppercase",marginBottom:6}}>🌸 Mi intención de hoy</p>
+        <p style={{fontFamily:FD,fontSize:15,color:T.brown,fontWeight:600,lineHeight:1.6,marginBottom:10}}>{intencion}</p>
+        <div style={{borderTop:`1px solid ${T.terra}22`,paddingTop:10}}>
+          <p style={{fontSize:10,fontWeight:700,color:T.sage,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:4}}>✨ Afirmación</p>
+          <p style={{fontSize:13,color:T.sage,fontStyle:"italic",lineHeight:1.6}}>{afirmacion}</p>
+        </div>
+      </div>
+
+      {/* CONSEJO DEL DÍA */}
+      <div style={{borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,padding:"18px",marginBottom:12}}>
+        <p style={{fontSize:10,fontWeight:700,color:T.brown,letterSpacing:"0.16em",textTransform:"uppercase",marginBottom:6}}>💡 Consejo Método Eri</p>
+        <p style={{fontSize:13,color:T.brown,lineHeight:1.7,maxHeight:expandConsejo?"none":"60px",overflow:"hidden"}}>{consejo}</p>
+        <button onClick={()=>setExpandConsejo(!expandConsejo)} style={{background:"none",border:"none",cursor:"pointer",fontSize:11,color:T.sage,fontWeight:700,marginTop:6,padding:0,fontFamily:FB}}>
+          {expandConsejo?"Ver menos ▲":"Ver más ▼"}
+        </button>
+      </div>
+
+      {/* RESPIRACIÓN 4-7-8 */}
+      {showRespiracion?<Respiracion478/>:(
+        <button onClick={()=>setShowRespiracion(true)} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"16px 18px",borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,cursor:"pointer",marginBottom:12,fontFamily:FB}}>
+          <div style={{display:"flex",alignItems:"center",gap:10}}>
+            <span style={{fontSize:20}}>🌬️</span>
+            <div style={{textAlign:"left"}}>
+              <p style={{fontSize:13,fontWeight:700,color:T.brown}}>Respiración 4-7-8</p>
+              <p style={{fontSize:11,color:T.stone}}>Calma el sistema nervioso en 3 ciclos</p>
+            </div>
+          </div>
+          <ChevronRight size={16} color={T.stoneMid}/>
+        </button>
+      )}
+
+      {/* HÁBITOS DIARIOS */}
+      <div style={{borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,padding:"18px",marginBottom:12}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+          <p style={{fontSize:11,fontWeight:700,color:T.stone,letterSpacing:"0.14em",textTransform:"uppercase"}}>✅ Hábitos de hoy</p>
+          <span style={{fontSize:11,padding:"4px 10px",borderRadius:10,background:completados===HABITOS_ERI.length?T.sage:T.stonePale,color:completados===HABITOS_ERI.length?"white":T.stone,fontWeight:700,transition:"all .3s"}}>{completados}/{HABITOS_ERI.length}</span>
+        </div>
+        {/* BARRA DE PROGRESO */}
+        <div style={{height:6,borderRadius:4,background:T.stonePale,marginBottom:14,overflow:"hidden"}}>
+          <div style={{height:"100%",width:`${(completados/HABITOS_ERI.length)*100}%`,borderRadius:4,background:`linear-gradient(90deg,${T.sage},${T.sageMid})`,transition:"width .4s"}}/>
+        </div>
+        {HABITOS_ERI.map(h=>(
+          <button key={h.id} onClick={()=>toggleHabito(h.id)} style={{width:"100%",display:"flex",alignItems:"center",gap:12,padding:"10px 0",background:"none",border:"none",cursor:"pointer",borderBottom:`1px solid ${T.stonePale}`,fontFamily:FB}}>
+            <div style={{width:24,height:24,borderRadius:8,border:`2px solid ${habitos[h.id]?T.sage:T.stoneMid}`,background:habitos[h.id]?T.sage:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .2s"}}>
+              {habitos[h.id]&&<span style={{fontSize:12,color:"white"}}>✓</span>}
+            </div>
+            <span style={{fontSize:13,color:habitos[h.id]?T.sage:T.brown,fontWeight:habitos[h.id]?700:400,textDecoration:habitos[h.id]?"line-through":"none",transition:"all .2s",textAlign:"left"}}>{h.emoji} {h.texto}</span>
+          </button>
+        ))}
+        {completados===HABITOS_ERI.length&&(
+          <div style={{textAlign:"center",padding:"14px 0 4px"}}>
+            <p style={{fontSize:20,marginBottom:4}}>🎉</p>
+            <p style={{fontSize:12,fontWeight:700,color:T.sage}}>¡Completaste todos tus hábitos hoy!</p>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
 // ── HOME ──────────────────────────────────────────────────────────────────────
 function HomeTab({state,goTo,isPremium,onUpgrade}){
   const {profile,pantry,recipesHistory}=state;
@@ -433,6 +695,8 @@ function HomeTab({state,goTo,isPremium,onUpgrade}){
           <Leaf size={20} color="white"/>
         </div>
       </div>
+
+      {/* FASE ACTUAL */}
       <div style={{borderRadius:24,background:`linear-gradient(135deg,${T.sage},${T.sageMid})`,padding:"22px 24px",marginBottom:16,boxShadow:`0 10px 32px ${T.sage}44`,position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",right:-20,top:-20,width:100,height:100,borderRadius:"50%",background:"rgba(255,255,255,0.06)"}}/>
         <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
@@ -442,23 +706,22 @@ function HomeTab({state,goTo,isPremium,onUpgrade}){
         <p style={{fontFamily:FD,fontSize:22,color:"white",fontWeight:700,marginBottom:4}}>{profile?.fase_eri||"Eliminación"}</p>
         <p style={{fontSize:12,color:"rgba(255,255,255,0.65)"}}>Sin gluten · Sin lácteos · Sin azúcar · Sin solanáceas</p>
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:20}}>
+
+      {/* ESTADÍSTICAS */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}}>
         {[{icon:ShoppingBag,n:pantry.length,label:"en despensa",color:T.terra},{icon:ChefHat,n:recipesHistory.length,label:"recetas cocinadas",color:T.sage}].map(({icon:I,n,label,color})=>(
           <div key={label} style={{borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,padding:"18px 16px"}}>
             <I size={18} color={color} style={{marginBottom:8}}/><p style={{fontFamily:FD,fontSize:28,fontWeight:700,color:T.brown,lineHeight:1}}>{n}</p><p style={{fontSize:11,color:T.stone,marginTop:4}}>{label}</p>
           </div>
         ))}
       </div>
-      {profile?.sintomas?.length>0&&<div style={{borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,padding:"16px",marginBottom:20}}>
-        <p style={{fontSize:10,fontWeight:700,color:T.stone,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:10}}>Síntomas en seguimiento</p>
-        <div style={{display:"flex",flexWrap:"wrap",gap:6}}>{profile.sintomas.map(s=><span key={s} style={{fontSize:11,padding:"5px 10px",borderRadius:12,background:T.terraPale,color:T.terra,fontWeight:600}}>{s}</span>)}</div>
-      </div>}
-      <button onClick={()=>goTo("pantry")} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"18px 20px",borderRadius:22,background:`linear-gradient(135deg,${T.terra},${T.terraLight})`,border:"none",cursor:"pointer",marginBottom:10,boxShadow:`0 6px 20px ${T.terra}44`}}>
-        <div style={{display:"flex",alignItems:"center",gap:12}}><Camera size={20} color="white"/><div style={{textAlign:"left"}}><p style={{fontSize:14,fontWeight:700,color:"white",fontFamily:FB}}>Foto de despensa</p><p style={{fontSize:11,color:"rgba(255,255,255,0.75)",marginTop:2}}>Identifica y registra tus alimentos</p></div></div>
-        <ChevronRight size={18} color="rgba(255,255,255,0.8)"/>
-      </button>
+
+      {/* BIENESTAR DEL DÍA */}
+      <BienestarSection/>
+
+      {/* ACCESOS RÁPIDOS */}
       <button onClick={()=>goTo("recipes")} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"18px 20px",borderRadius:22,background:T.warmWhite,border:`1px solid ${T.stonePale}`,cursor:"pointer"}}>
-        <div style={{display:"flex",alignItems:"center",gap:12}}><ChefHat size={20} color={T.sage}/><div style={{textAlign:"left"}}><p style={{fontSize:14,fontWeight:700,color:T.brown,fontFamily:FB}}>¿Qué cocino hoy?</p><p style={{fontSize:11,color:T.stone,marginTop:2}}>Recetas Método Eri con tu despensa</p></div></div>
+        <div style={{display:"flex",alignItems:"center",gap:12}}><ChefHat size={20} color={T.sage}/><div style={{textAlign:"left"}}><p style={{fontSize:14,fontWeight:700,color:T.brown,fontFamily:FB}}>¿Qué cocino hoy?</p><p style={{fontSize:11,color:T.stone,marginTop:2}}>Recetas Método Eri</p></div></div>
         <ChevronRight size={18} color={T.stoneMid}/>
       </button>
     </div>
