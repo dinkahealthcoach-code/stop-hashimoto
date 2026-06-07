@@ -16,7 +16,8 @@ const FB = `'Trebuchet MS', 'Century Gothic', sans-serif`;
 // ── LEMON SQUEEZY CONFIG ─────────────────────────────────────────────────────
 const LS_PREMIUM_URL = "https://stophashimoto.lemonsqueezy.com/checkout/buy/6ba9043a-2389-49a2-b361-862b0702869f";
 const LS_ALUMNAS_URL = "https://stophashimoto.lemonsqueezy.com/checkout/buy/757e5d80-a898-4648-a04a-f85b1697bcbc";
-const FREE_RECIPES_LIMIT = 5;
+const FREE_RECIPES_LIMIT = 1; // 1 receta por categoría
+const PREMIUM_RECIPES_LIMIT = 10; // 10 recetas en total
 
 // ── MEMBERSHIP HELPERS ────────────────────────────────────────────────────────
 async function getMembership(){try{const r=await window.storage.get("membership:status",false);return r?JSON.parse(r.value):null;}catch{return null;}}
@@ -67,7 +68,7 @@ function PaywallScreen({onActivate}){
               <div><p style={{fontSize:14,fontWeight:700,color:"white",marginBottom:2}}>Plan Gratuito</p><p style={{fontSize:11,color:"rgba(255,255,255,0.5)"}}>Sin tarjeta requerida</p></div>
               <span style={{fontSize:20,fontWeight:800,color:"rgba(255,255,255,0.4)"}}>$0</span>
             </div>
-            {["5 recetas del Método Eri","Guía de fases AIP","Consejo del día"].map(f=>(
+            {["1 receta por categoría del Método Eri","Guía de fases AIP","Consejo del día"].map(f=>(
               <div key={f} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
                 <CheckCircle size={12} color="rgba(255,255,255,0.3)"/>
                 <span style={{fontSize:12,color:"rgba(255,255,255,0.5)"}}>{f}</span>
@@ -92,7 +93,7 @@ function PaywallScreen({onActivate}){
                 <p style={{fontSize:10,color:"rgba(255,255,255,0.7)"}}>/mes</p>
               </div>
             </div>
-            {["24 recetas AIP Método Eri","IA identificador de alimentos","Verificador de etiquetas AIP","Generador de recetas con IA","Seguimiento de síntomas","Plan semanal + macros"].map(f=>(
+            {["10 recetas AIP Método Eri","IA identificador de alimentos","Verificador de etiquetas AIP","Generador de recetas con IA","Seguimiento de síntomas","Plan semanal + macros"].map(f=>(
               <div key={f} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
                 <CheckCircle size={12} color="white"/>
                 <span style={{fontSize:12,color:"white"}}>{f}</span>
@@ -103,29 +104,6 @@ function PaywallScreen({onActivate}){
             </button>
           </div>
 
-          {/* PLAN ALUMNAS */}
-          <div style={{borderRadius:20,background:"rgba(255,255,255,0.08)",border:`1px solid ${T.sageLight}44`,padding:"20px",backdropFilter:"blur(10px)"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
-              <div>
-                <span style={{fontSize:9,fontWeight:800,color:T.sageLight,letterSpacing:"0.15em",textTransform:"uppercase",background:"rgba(184,212,187,0.15)",padding:"3px 8px",borderRadius:8}}>ALUMNAS STOP HASHIMOTO</span>
-                <p style={{fontSize:14,fontWeight:700,color:"white",marginTop:6,marginBottom:2}}>Plan Alumnas</p>
-                <p style={{fontSize:11,color:"rgba(255,255,255,0.5)"}}>1 mes gratis · luego $8.90/mes</p>
-              </div>
-              <div style={{textAlign:"right"}}>
-                <span style={{fontSize:22,fontWeight:800,color:T.sageLight}}>$8.90</span>
-                <p style={{fontSize:10,color:"rgba(255,255,255,0.5)"}}>/mes</p>
-              </div>
-            </div>
-            {["Todo el Plan Premium","1 mes de prueba gratis","Precio especial alumnas"].map(f=>(
-              <div key={f} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-                <CheckCircle size={12} color={T.sageLight}/>
-                <span style={{fontSize:12,color:"rgba(255,255,255,0.7)"}}>{f}</span>
-              </div>
-            ))}
-            <button onClick={()=>window.open(LS_ALUMNAS_URL,"_blank")} style={{width:"100%",marginTop:14,padding:"12px",borderRadius:14,border:`1px solid ${T.sageLight}`,background:"transparent",color:T.sageLight,fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:FB}}>
-              Acceder como alumna →
-            </button>
-          </div>
         </div>
       )}
 
@@ -768,7 +746,18 @@ function RecetarioSH({onBack,perfilFase,isPremium,onUpgrade}){
     (cat==="todos"||r.cat===cat)&&
     (q===""||r.titulo.toLowerCase().includes(q.toLowerCase())||r.ing.some(i=>i.toLowerCase().includes(q.toLowerCase())))
   );
-  const filtradas=isPremium?todasFiltradas:todasFiltradas.slice(0,FREE_RECIPES_LIMIT);
+  // Free: 1 receta por categoría. Premium: 10 recetas en total
+  let filtradas;
+  if(isPremium){
+    filtradas=todasFiltradas.slice(0,PREMIUM_RECIPES_LIMIT);
+  } else {
+    const vistas=new Set();
+    filtradas=todasFiltradas.filter(r=>{
+      if(vistas.has(r.cat))return false;
+      vistas.add(r.cat);
+      return true;
+    });
+  }
   return(
     <div style={{padding:"20px 20px 96px",fontFamily:FB}}>
       <button onClick={onBack} style={{display:"flex",alignItems:"center",gap:6,background:"none",border:"none",cursor:"pointer",fontSize:13,color:T.stone,fontWeight:600,marginBottom:16,padding:0}}><ChevronLeft size={16}/> Volver</button>
@@ -795,7 +784,7 @@ function RecetarioSH({onBack,perfilFase,isPremium,onUpgrade}){
       <div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:10,marginBottom:16}}>
         {CATS_R.map(c=><button key={c.id} onClick={()=>setCat(c.id)} style={{flexShrink:0,padding:"7px 14px",borderRadius:20,border:`1.5px solid ${cat===c.id?T.sage:T.stoneMid}`,background:cat===c.id?T.sage:"white",color:cat===c.id?"white":T.brown,fontSize:12,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",fontFamily:FB}}>{c.emoji} {c.label}</button>)}
       </div>
-      <p style={{fontSize:11,color:T.stone,marginBottom:12}}>{filtradas.length} receta{filtradas.length!==1?"s":""} para {fase}{!isPremium?" (plan gratuito: 5 recetas)":""}</p>
+      <p style={{fontSize:11,color:T.stone,marginBottom:12}}>{filtradas.length} receta{filtradas.length!==1?"s":""} para {fase}{!isPremium?" (gratuito: 1 por categoría)":` (premium: hasta ${PREMIUM_RECIPES_LIMIT})`}</p>
       {filtradas.length===0?<div style={{textAlign:"center",padding:"40px 16px",color:T.stone,fontSize:13}}>No encontré recetas con ese término 🌿</div>
        :filtradas.map(r=>(
         <button key={r.id} onClick={()=>setAbierta(r)} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 16px",borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,marginBottom:10,cursor:"pointer",textAlign:"left"}}>
@@ -813,7 +802,8 @@ function RecetarioSH({onBack,perfilFase,isPremium,onUpgrade}){
           <ChevronRight size={16} color={T.stoneMid}/>
         </button>
        ))}
-      {!isPremium&&todasFiltradas.length>FREE_RECIPES_LIMIT&&<PremiumLock onUpgrade={onUpgrade}/>}
+      {!isPremium&&<PremiumLock onUpgrade={onUpgrade}/>}
+      {isPremium&&todasFiltradas.length>PREMIUM_RECIPES_LIMIT&&<div style={{margin:"16px 0",padding:"14px",borderRadius:16,background:T.sagePale,border:`1px solid ${T.sageLight}`,textAlign:"center"}}><p style={{fontSize:12,color:T.sage}}>Plan Premium incluye {PREMIUM_RECIPES_LIMIT} recetas por fase 🌿</p></div>}
       {abierta&&<RecetaModal receta={abierta} onClose={()=>setAbierta(null)}/>}
     </div>
   );
@@ -1031,7 +1021,7 @@ function ProfileTab({state,dispatch,isPremium,onUpgrade}){
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div>
             <p style={{fontSize:11,fontWeight:700,color:isPremium?T.terra:T.stone,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:4}}>{isPremium?"✨ Plan Premium":"Plan Gratuito"}</p>
-            <p style={{fontSize:12,color:T.brownMid,lineHeight:1.5}}>{isPremium?"Acceso completo al Método Eri con IA":"Acceso limitado · 5 recetas"}</p>
+            <p style={{fontSize:12,color:T.brownMid,lineHeight:1.5}}>{isPremium?"Acceso a 10 recetas + todas las funciones IA":"Acceso limitado · 1 receta por categoría"}</p>
           </div>
           {!isPremium&&<button onClick={onUpgrade} style={{padding:"9px 16px",borderRadius:12,border:"none",background:`linear-gradient(135deg,${T.terra},${T.terraLight})`,color:"white",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:FB,flexShrink:0,marginLeft:12}}>Upgrade →</button>}
         </div>
