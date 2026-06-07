@@ -1074,10 +1074,11 @@ function ProfileTab({state,dispatch,isPremium,onUpgrade}){
         <p style={{fontSize:10,fontWeight:700,color:T.stone,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:6}}>Notas personales</p>
         <p style={{fontSize:13,color:T.brown,lineHeight:1.6}}>{profile.notas}</p>
       </div>}
-      <div style={{borderRadius:20,background:T.sagePale,border:`1px solid ${T.sageLight}`,padding:"16px",marginBottom:24}}>
+      <div style={{borderRadius:20,background:T.sagePale,border:`1px solid ${T.sageLight}`,padding:"16px",marginBottom:16}}>
         <p style={{fontSize:11,fontWeight:700,color:T.sage,marginBottom:4}}>🌿 Stop Hashimoto Program</p>
         <p style={{fontSize:12,color:T.sage,lineHeight:1.6}}>Coach certificada · Instituto IIN Nueva York · Especialista en enfermedades autoinmunes y Método Eri</p>
       </div>
+      <SuplementosSection/>
       {confirm?<div style={{borderRadius:18,background:"#FDECEA",border:`1px solid ${T.error}33`,padding:"16px"}}>
         <p style={{fontSize:13,fontWeight:700,color:T.error,marginBottom:12}}>¿Estás segura de reiniciar todo tu perfil y despensa?</p>
         <div style={{display:"flex",gap:8}}>
@@ -1089,7 +1090,234 @@ function ProfileTab({state,dispatch,isPremium,onUpgrade}){
   );
 }
 
-// ── SÍNTOMAS DATA ─────────────────────────────────────────────────────────────
+// ── SUPLEMENTOS DATA ──────────────────────────────────────────────────────────
+const SUPLEMENTOS_DATA = [
+  {
+    nombre:"Vitamina D3",emoji:"☀️",
+    cuando:"Mañana con desayuno (con grasa)",
+    dosis:"2.000–5.000 UI/día según niveles",
+    notas:"Tomar siempre con vitamina K2 para mejor absorción y proteger arterias. Tomar con comida que contenga grasa.",
+    interacciones:["No tomar con calcio en la misma toma si es dosis alta","Tomar junto con K2"],
+    color:"#E8A000"
+  },
+  {
+    nombre:"Magnesio (glicinato o malato)",emoji:"🌙",
+    cuando:"Noche antes de dormir",
+    dosis:"200–400 mg/día",
+    notas:"El glicinato es el mejor para Hashimoto: calma el sistema nervioso, mejora el sueño y reduce la inflamación. Evitar el óxido de magnesio (poco absorbible).",
+    interacciones:["No tomar con zinc en la misma toma","Separar del hierro al menos 2 horas"],
+    color:"#6B9470"
+  },
+  {
+    nombre:"Selenio",emoji:"🔬",
+    cuando:"Mañana con desayuno",
+    dosis:"100–200 mcg/día",
+    notas:"Esencial para convertir T4 en T3 activa y reducir anticuerpos TPO. No superar 400 mcg/día. Preferir selenometionina.",
+    interacciones:["Separar de la levotiroxina al menos 4 horas","No combinar con yodo en dosis altas sin supervisión médica"],
+    color:"#B8603A"
+  },
+  {
+    nombre:"Zinc",emoji:"⚡",
+    cuando:"Almuerzo o cena (con comida)",
+    dosis:"15–30 mg/día",
+    notas:"Regula la función tiroidea y el sistema inmune. Tomar siempre con comida para evitar náuseas. Equilibrar con cobre si se toma más de 3 meses.",
+    interacciones:["No tomar con magnesio en la misma toma","No tomar en ayunas","Separar del hierro 2 horas"],
+    color:"#4A3728"
+  },
+  {
+    nombre:"Omega 3",emoji:"🐟",
+    cuando:"Almuerzo o cena (con comida grasa)",
+    dosis:"1.000–3.000 mg EPA+DHA/día",
+    notas:"Antiinflamatorio clave para autoinmunidad. Tomar con la comida más grande del día. Refrigerar una vez abierto. Preferir EPA alto para inflamación.",
+    interacciones:["Puede potenciar anticoagulantes — consultar médico","Separar de la vitamina E si es en dosis alta"],
+    color:"#2C7BB6"
+  },
+  {
+    nombre:"Hierro (bisglicinato)",emoji:"🔴",
+    cuando:"Mañana en ayunas (o con vitamina C)",
+    dosis:"Según ferritina — solo si hay deficiencia confirmada",
+    notas:"Tomar en ayunas para máxima absorción o con vitamina C. El bisglicinato es el más tolerable para el estómago. Confirmar niveles antes de suplementar.",
+    interacciones:["NO tomar con calcio","NO tomar con té, café o lácteos","Separar de la levotiroxina al menos 4 horas","Separar del magnesio y zinc al menos 2 horas"],
+    color:"#C0392B"
+  },
+  {
+    nombre:"L-Glutamina",emoji:"🌱",
+    cuando:"Mañana en ayunas o antes de dormir",
+    dosis:"5–10 g/día",
+    notas:"Repara el intestino permeable (leaky gut), clave en autoinmunidad. Disolver en agua fría — el calor la destruye. Ciclos de 1–3 meses.",
+    interacciones:["Evitar en personas con epilepsia o sensibilidad al glutamato","No mezclar con bebidas calientes"],
+    color:"#3A7D55"
+  },
+  {
+    nombre:"Vitamina B12",emoji:"💊",
+    cuando:"Mañana con desayuno",
+    dosis:"500–1.000 mcg/día (metilcobalamina)",
+    notas:"Muy deficiente en Hashimoto. Preferir metilcobalamina (no cianocobalamina). Sublingual para mejor absorción. Esencial para energía y sistema nervioso.",
+    interacciones:["Separar de la levotiroxina al menos 4 horas","Potencia el efecto del folato"],
+    color:"#8E44AD"
+  },
+  {
+    nombre:"Vitamina C",emoji:"🍊",
+    cuando:"Con cada comida o en ayunas",
+    dosis:"500–1.000 mg/día",
+    notas:"Antioxidante, mejora absorción del hierro y apoya las glándulas suprarrenales. Dividir en 2 tomas si se usan dosis altas para mejor tolerancia.",
+    interacciones:["Potencia absorción del hierro — tomar juntos","Separar del cobre en dosis altas"],
+    color:"#E67E22"
+  },
+  {
+    nombre:"Probióticos",emoji:"🦠",
+    cuando:"Mañana en ayunas o noche antes de dormir",
+    dosis:"10–50 billones UFC/día",
+    notas:"Fundamental para el eje intestino-tiroides. Rotar cepas cada 2–3 meses. Refrigerar. Buscar cepas Lactobacillus y Bifidobacterium.",
+    interacciones:["Separar de antibióticos al menos 2 horas","No tomar al mismo tiempo que el hierro"],
+    color:"#16A085"
+  },
+  {
+    nombre:"Cúrcuma + Pimienta negra",emoji:"🟡",
+    cuando:"Almuerzo o cena (con comida y grasa)",
+    dosis:"500–1.000 mg curcumina/día",
+    notas:"Potente antiinflamatorio. La pimienta negra (piperina) aumenta la absorción de curcumina hasta un 2.000%. Siempre tomar con grasa y pimienta.",
+    interacciones:["Puede potenciar anticoagulantes","Separar de medicamentos que procesa el hígado"],
+    color:"#F39C12"
+  },
+  {
+    nombre:"Ashwagandha",emoji:"🌿",
+    cuando:"Noche antes de dormir",
+    dosis:"300–600 mg/día (extracto KSM-66)",
+    notas:"Adaptógeno que regula el cortisol y apoya la tiroides. Iniciar con dosis baja. Ciclos de 2–3 meses con descanso de 1 mes. Consultar si hay hipertiroidismo.",
+    interacciones:["Precaución con medicamentos para tiroides — puede potenciar su efecto","Evitar en embarazo"],
+    color:"#27AE60"
+  },
+];
+
+function SuplementosSection(){
+  const [abierto, setAbierto] = useState(false);
+  const [misSuplementos, setMisSuplementos] = useState([]);
+  const [busqueda, setBusqueda] = useState("");
+  const [detalle, setDetalle] = useState(null);
+
+  useEffect(()=>{
+    try{const s=JSON.parse(localStorage.getItem("suplementos:lista")||"[]");setMisSuplementos(s);}catch{}
+  },[]);
+
+  function toggleSuplemento(nombre){
+    const nuevo=misSuplementos.includes(nombre)
+      ?misSuplementos.filter(s=>s!==nombre)
+      :[...misSuplementos,nombre];
+    setMisSuplementos(nuevo);
+    localStorage.setItem("suplementos:lista",JSON.stringify(nuevo));
+  }
+
+  const filtrados=SUPLEMENTOS_DATA.filter(s=>
+    busqueda.length<2||s.nombre.toLowerCase().includes(busqueda.toLowerCase())
+  );
+  const misData=SUPLEMENTOS_DATA.filter(s=>misSuplementos.includes(s.nombre));
+
+  return(
+    <div style={{borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,marginBottom:16,overflow:"hidden"}}>
+      {/* HEADER ACORDEÓN */}
+      <button onClick={()=>setAbierto(!abierto)} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"16px",background:"none",border:"none",cursor:"pointer",fontFamily:FB}}>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <span style={{fontSize:20}}>💊</span>
+          <div style={{textAlign:"left"}}>
+            <p style={{fontSize:13,fontWeight:700,color:T.brown}}>Mis Suplementos</p>
+            <p style={{fontSize:11,color:T.stone}}>{misSuplementos.length>0?`${misSuplementos.length} suplemento${misSuplementos.length>1?"s":""} activo${misSuplementos.length>1?"s":""}` :"Agregar y ver cuándo tomarlos"}</p>
+          </div>
+        </div>
+        <span style={{fontSize:12,color:T.stone}}>{abierto?"▲":"▼"}</span>
+      </button>
+
+      {abierto&&(
+        <div style={{padding:"0 16px 16px"}}>
+          {/* MIS SUPLEMENTOS ACTIVOS */}
+          {misData.length>0&&(
+            <div style={{marginBottom:16}}>
+              <p style={{fontSize:10,fontWeight:700,color:T.stone,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:10}}>📋 Mi protocolo diario</p>
+              {/* Organizar por momento del día */}
+              {[
+                ["🌅 Mañana en ayunas", misData.filter(s=>s.cuando.toLowerCase().includes("ayunas"))],
+                ["🍳 Con desayuno", misData.filter(s=>s.cuando.toLowerCase().includes("desayuno"))],
+                ["☀️ Con almuerzo/cena", misData.filter(s=>s.cuando.toLowerCase().includes("almuerzo")||s.cuando.toLowerCase().includes("cena"))],
+                ["🌙 Noche", misData.filter(s=>s.cuando.toLowerCase().includes("noche"))],
+              ].filter(([_,items])=>items.length>0).map(([momento,items])=>(
+                <div key={momento} style={{marginBottom:12}}>
+                  <p style={{fontSize:11,fontWeight:700,color:T.brownMid,marginBottom:6}}>{momento}</p>
+                  {items.map(s=>(
+                    <button key={s.nombre} onClick={()=>setDetalle(detalle?.nombre===s.nombre?null:s)} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 12px",borderRadius:14,border:`1.5px solid ${s.color}33`,background:`${s.color}11`,cursor:"pointer",marginBottom:6,fontFamily:FB}}>
+                      <div style={{display:"flex",alignItems:"center",gap:8}}>
+                        <span style={{fontSize:16}}>{s.emoji}</span>
+                        <div style={{textAlign:"left"}}>
+                          <p style={{fontSize:13,fontWeight:700,color:T.brown}}>{s.nombre}</p>
+                          <p style={{fontSize:11,color:T.stone}}>{s.dosis}</p>
+                        </div>
+                      </div>
+                      <span style={{fontSize:11,color:s.color,fontWeight:700}}>{detalle?.nombre===s.nombre?"▲":"▼"}</span>
+                    </button>
+                  ))}
+                  {/* DETALLE EXPANDIDO */}
+                  {items.filter(s=>detalle?.nombre===s.nombre).map(s=>(
+                    <div key={s.nombre+"det"} style={{borderRadius:14,background:T.cream,border:`1px solid ${s.color}33`,padding:"14px",marginBottom:8}}>
+                      <p style={{fontSize:12,color:T.brown,lineHeight:1.7,marginBottom:10}}>{s.notas}</p>
+                      {s.interacciones.length>0&&(
+                        <div style={{borderRadius:10,background:"#FFF8E7",border:"1px solid #C8932A33",padding:"10px 12px"}}>
+                          <p style={{fontSize:11,fontWeight:700,color:"#C8932A",marginBottom:6}}>⚠️ Interacciones importantes:</p>
+                          {s.interacciones.map((int,i)=>(
+                            <p key={i} style={{fontSize:11,color:T.brown,marginBottom:4,lineHeight:1.5}}>• {int}</p>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* BUSCADOR */}
+          <p style={{fontSize:10,fontWeight:700,color:T.stone,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:8}}>Agregar suplemento</p>
+          <input value={busqueda} onChange={e=>setBusqueda(e.target.value)} placeholder="Buscar suplemento..." style={{width:"100%",padding:"11px 14px",borderRadius:14,border:`1.5px solid ${T.stoneMid}`,background:T.cream,fontSize:13,color:T.ink,outline:"none",fontFamily:FB,boxSizing:"border-box",marginBottom:10}}/>
+          <div style={{display:"flex",flexDirection:"column",gap:6}}>
+            {filtrados.map(s=>{
+              const activo=misSuplementos.includes(s.nombre);
+              return(
+                <button key={s.nombre} onClick={()=>toggleSuplemento(s.nombre)} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"11px 14px",borderRadius:14,border:`1.5px solid ${activo?s.color:T.stonePale}`,background:activo?`${s.color}11`:T.warmWhite,cursor:"pointer",fontFamily:FB}}>
+                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                    <span style={{fontSize:16}}>{s.emoji}</span>
+                    <div style={{textAlign:"left"}}>
+                      <p style={{fontSize:13,fontWeight:activo?700:400,color:activo?s.color:T.brown}}>{s.nombre}</p>
+                      <p style={{fontSize:10,color:T.stone}}>{s.cuando}</p>
+                    </div>
+                  </div>
+                  <span style={{fontSize:16,color:activo?s.color:T.stoneMid}}>{activo?"✓":"+"}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DETALLE */}
+      {detalle&&!abierto&&(
+        <div style={{position:"fixed",inset:0,zIndex:200,background:"rgba(44,32,24,0.6)",display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={()=>setDetalle(null)}>
+          <div onClick={e=>e.stopPropagation()} style={{width:"100%",maxWidth:480,borderRadius:"28px 28px 0 0",background:T.cream,padding:"24px 20px 48px"}}>
+            <div style={{display:"flex",justifyContent:"center",marginBottom:16}}><div style={{width:40,height:4,borderRadius:2,background:T.stoneMid}}/></div>
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+              <span style={{fontSize:28}}>{detalle.emoji}</span>
+              <div><h3 style={{fontFamily:FD,fontSize:20,color:T.brown,fontWeight:700}}>{detalle.nombre}</h3><p style={{fontSize:12,color:detalle.color,fontWeight:700}}>{detalle.cuando}</p></div>
+            </div>
+            <p style={{fontSize:12,fontWeight:700,color:T.stone,marginBottom:4}}>Dosis sugerida</p>
+            <p style={{fontSize:13,color:T.brown,marginBottom:12}}>{detalle.dosis}</p>
+            <p style={{fontSize:13,color:T.brown,lineHeight:1.7,marginBottom:12}}>{detalle.notas}</p>
+            {detalle.interacciones.length>0&&<div style={{borderRadius:14,background:"#FFF8E7",border:"1px solid #C8932A44",padding:"14px"}}>
+              <p style={{fontSize:11,fontWeight:700,color:"#C8932A",marginBottom:8}}>⚠️ Interacciones importantes</p>
+              {detalle.interacciones.map((int,i)=><p key={i} style={{fontSize:12,color:T.brown,marginBottom:6,lineHeight:1.5}}>• {int}</p>)}
+            </div>}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 const SINTOMAS_GRUPOS = [
   {
     grupo: "Tiroides & Hashimoto",
