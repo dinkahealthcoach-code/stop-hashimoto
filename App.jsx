@@ -580,7 +580,6 @@ Responde SOLO con este JSON:
 // ── DESPENSA ──────────────────────────────────────────────────────────────────
 function PantryTab({state,dispatch,isPremium,onUpgrade}){
   const {pantry,profile}=state;
-  const [loading,setLoading]=useState(false);
   const [err,setErr]=useState(null);
   const [filter,setFilter]=useState("all");
   const [showEtiqueta,setShowEtiqueta]=useState(false);
@@ -589,7 +588,13 @@ function PantryTab({state,dispatch,isPremium,onUpgrade}){
   const [manualQty,setManualQty]=useState("1");
   const [manualUnit,setManualUnit]=useState("unidad");
   const [manualCat,setManualCat]=useState("otro");
-  const fileRef=useRef();
+
+  // Límite 5 fotos de etiqueta por día
+  const fechaHoy = new Date().toISOString().split("T")[0];
+  function getEtiquetasHoy(){try{const d=JSON.parse(localStorage.getItem("etiquetas:limite")||"{}");return d.fecha===fechaHoy?d.count:0;}catch{return 0;}}
+  function incrementEtiquetas(){try{const c=getEtiquetasHoy();localStorage.setItem("etiquetas:limite",JSON.stringify({fecha:fechaHoy,count:c+1}));}catch{}}
+  const etiquetasHoy = getEtiquetasHoy();
+  const LIMITE_ETIQUETAS = 5;
 
   async function handleManualAdd(){
     if(!manualName.trim()){return;}
@@ -602,49 +607,29 @@ function PantryTab({state,dispatch,isPremium,onUpgrade}){
     setManualName("");setManualQty("1");setManualUnit("unidad");setManualCat("otro");
     setShowManual(false);
   }
-  async function handleFile(e){
-    const file=e.target.files?.[0];if(!file)return;
-    setLoading(true);setErr(null);
-    try{
-      const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(",")[1]);r.onerror=rej;r.readAsDataURL(file);});
-      const sys=`Eres un asistente experto en nutrición del programa Stop Hashimoto. Tu tarea es identificar alimentos en imágenes. Siempre respondes SOLO con JSON válido, sin texto adicional, sin markdown, sin explicaciones.`;
-      const txt=await callClaude([{role:"user",content:[
-        {type:"image",source:{type:"base64",media_type:file.type,data:b64}},
-        {type:"text",text:`Identifica TODOS los alimentos, ingredientes o productos alimenticios que puedas ver en esta imagen. Pueden estar en una despensa, refrigerador, mesón, bolsa o plato. Sé generoso — si puedes adivinar que es un alimento, inclúyelo. Clasifica cada uno en: proteina, carbohidrato, verdura, fruta, grasa, otro. Si la imagen no tiene alimentos visibles, devuelve items vacío.
-
-Responde ÚNICAMENTE con este JSON sin ningún texto antes o después:
-{"items":[{"name":"nombre en español","quantity":1,"unit":"unidad","category":"proteina|carbohidrato|verdura|fruta|grasa|otro"}]}`}
-      ]}],sys,1500);
-      const parsed=pj(txt);
-      if(!parsed.items||parsed.items.length===0){setErr("No detecté alimentos en la foto. Asegúrate de que los alimentos estén bien visibles.");return;}
-      dispatch({type:"MERGE_PANTRY",p:parsed.items});
-      const next=[...pantry];parsed.items.forEach(ni=>{const idx=next.findIndex(i=>i.name.toLowerCase()===ni.name.toLowerCase());idx>=0?(next[idx]={...next[idx],quantity:(next[idx].quantity||0)+(ni.quantity||0)}):next.push(ni);});
-      await dbSet("pantry:items",next);
-    }catch(e){setErr("Error al procesar la imagen: "+e.message);}
-    finally{setLoading(false);if(fileRef.current)fileRef.current.value="";}
-  }
   const visible=filter==="all"?pantry:pantry.filter(i=>i.category===filter);
   return(
     <div style={{padding:"56px 20px 96px",fontFamily:FB}}>
       <h2 style={{fontFamily:FD,fontSize:26,color:T.brown,fontWeight:700,marginBottom:4}}>Despensa Método Eri</h2>
       <p style={{fontSize:12,color:T.stone,marginBottom:16}}>{pantry.length} ingredientes disponibles</p>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
-        <label style={{display:"block"}} onClick={!isPremium?e=>{e.preventDefault();onUpgrade();}:undefined}>
-          <input ref={fileRef} type="file" accept="image/*" capture="environment" style={{display:"none"}} onChange={isPremium?handleFile:undefined}/>
-          <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:6,padding:"16px 10px",borderRadius:20,background:isPremium?`linear-gradient(135deg,${T.terra},${T.terraLight})`:`linear-gradient(135deg,${T.stoneMid},${T.stone})`,cursor:"pointer",boxShadow:isPremium?`0 6px 20px ${T.terra}44`:"none",textAlign:"center",position:"relative"}}>
-            {!isPremium&&<span style={{position:"absolute",top:8,right:8,fontSize:10}}>🔒</span>}
-            <Camera size={20} color="white"/>
-            <span style={{fontSize:12,fontWeight:700,color:"white",lineHeight:1.3}}>Foto de despensa</span>
-            <span style={{fontSize:10,color:"rgba(255,255,255,0.75)"}}>{isPremium?"Identifica alimentos":"Premium"}</span>
+
+      {/* VERIFICAR ETIQUETA con límite diario */}
+      <button onClick={()=>{
+        if(!isPremium){onUpgrade();return;}
+        if(etiquetasHoy>=LIMITE_ETIQUETAS){setErr(`Límite diario alcanzado (${LIMITE_ETIQUETAS} fotos/día). Vuelve mañana.`);return;}
+        incrementEtiquetas();
+        setShowEtiqueta(true);
+      }} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"16px 20px",borderRadius:20,background:isPremium?`linear-gradient(135deg,${T.brown},${T.brownMid})`:`linear-gradient(135deg,${T.stoneMid},${T.stone})`,border:"none",cursor:"pointer",marginBottom:10,boxShadow:isPremium?`0 6px 20px ${T.brown}44`:"none",position:"relative"}}>
+        {!isPremium&&<span style={{position:"absolute",top:8,right:8,fontSize:10}}>🔒</span>}
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <span style={{fontSize:22}}>🏷️</span>
+          <div style={{textAlign:"left"}}>
+            <p style={{fontSize:13,fontWeight:700,color:"white",fontFamily:FB}}>Verificar etiqueta AIP</p>
+            <p style={{fontSize:11,color:"rgba(255,255,255,0.75)"}}>{isPremium?`${etiquetasHoy}/${LIMITE_ETIQUETAS} fotos usadas hoy`:"Premium"}</p>
           </div>
-        </label>
-        <button onClick={isPremium?()=>setShowEtiqueta(true):onUpgrade} style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:6,padding:"16px 10px",borderRadius:20,background:isPremium?`linear-gradient(135deg,${T.brown},${T.brownMid})`:`linear-gradient(135deg,${T.stoneMid},${T.stone})`,border:"none",cursor:"pointer",boxShadow:isPremium?`0 6px 20px ${T.brown}44`:"none",textAlign:"center",position:"relative"}}>
-          {!isPremium&&<span style={{position:"absolute",top:8,right:8,fontSize:10}}>🔒</span>}
-          <span style={{fontSize:20}}>🏷️</span>
-          <span style={{fontSize:12,fontWeight:700,color:"white",lineHeight:1.3}}>Verificar etiqueta</span>
-          <span style={{fontSize:10,color:"rgba(255,255,255,0.75)"}}>{isPremium?"¿Es apto AIP?":"Premium"}</span>
-        </button>
-      </div>
+        </div>
+        {isPremium&&<div style={{display:"flex",gap:2}}>{Array.from({length:LIMITE_ETIQUETAS},(_,i)=><div key={i} style={{width:6,height:6,borderRadius:"50%",background:i<etiquetasHoy?"rgba(255,255,255,0.4)":"rgba(255,255,255,0.9)"}}/>)}</div>}
+      </button>
 
       {/* BOTÓN AGREGAR A MANO — disponible para todos */}
       <button onClick={()=>setShowManual(true)} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"center",gap:8,padding:"13px",borderRadius:20,border:`1.5px dashed ${T.sage}`,background:T.sagePale,cursor:"pointer",marginBottom:16,fontFamily:FB}}>
@@ -675,7 +660,6 @@ Responde ÚNICAMENTE con este JSON sin ningún texto antes o después:
         </div>
       )}
 
-      {loading&&<Spin msg="Identificando alimentos en tu despensa…"/>}
       {err&&<Err msg={err} onClose={()=>setErr(null)}/>}
       {pantry.length>0&&<div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:8,marginBottom:14}}>
         {[["all","Todos","🌿"],...Object.entries(CATS).map(([k,v])=>[k,v.label,v.emoji])].map(([k,l,em])=>(
@@ -684,7 +668,7 @@ Responde ÚNICAMENTE con este JSON sin ningún texto antes o después:
           </button>
         ))}
       </div>}
-      {pantry.length===0?<Empty Icon={ShoppingBag} title="Tu despensa está vacía" sub="Fotografía tu despensa o agrega ingredientes a mano."/>
+      {pantry.length===0?<Empty Icon={ShoppingBag} title="Tu despensa está vacía" sub="Agrega ingredientes a mano con el botón de arriba."/>
        :visible.length===0?<Empty Icon={Soup} title="Nada en esta categoría" sub="Prueba otro filtro."/>
        :visible.map((item,i)=>{
         const c=CATS[item.category]||CATS.otro;
@@ -1356,9 +1340,234 @@ function SintomasTab({isPremium, onUpgrade}){
   );
 }
 
+// ── MACROS DATA ───────────────────────────────────────────────────────────────
+const ALIMENTOS_MACROS = [
+  {nombre:"Pollo a la plancha (100g)",kcal:165,prot:31,carbs:0,grasas:3.6,fibra:0,cat:"proteina"},
+  {nombre:"Salmón (100g)",kcal:208,prot:20,carbs:0,grasas:13,fibra:0,cat:"proteina"},
+  {nombre:"Atún en agua (100g)",kcal:116,prot:26,carbs:0,grasas:1,fibra:0,cat:"proteina"},
+  {nombre:"Carne de res magra (100g)",kcal:218,prot:26,carbs:0,grasas:12,fibra:0,cat:"proteina"},
+  {nombre:"Pavo (100g)",kcal:189,prot:29,carbs:0,grasas:7,fibra:0,cat:"proteina"},
+  {nombre:"Camote/Boniato cocido (100g)",kcal:86,prot:1.6,carbs:20,grasas:0.1,fibra:3,cat:"carbs"},
+  {nombre:"Yuca cocida (100g)",kcal:112,prot:0.9,carbs:27,grasas:0.3,fibra:1,cat:"carbs"},
+  {nombre:"Plátano verde cocido (100g)",kcal:89,prot:1.1,carbs:23,grasas:0.3,fibra:2,cat:"carbs"},
+  {nombre:"Palta/Aguacate (100g)",kcal:160,prot:2,carbs:9,grasas:15,fibra:7,cat:"grasa"},
+  {nombre:"Aceite de oliva (1 cda)",kcal:119,prot:0,carbs:0,grasas:13.5,fibra:0,cat:"grasa"},
+  {nombre:"Aceite de coco (1 cda)",kcal:117,prot:0,carbs:0,grasas:14,fibra:0,cat:"grasa"},
+  {nombre:"Espinaca (100g)",kcal:23,prot:2.9,carbs:3.6,grasas:0.4,fibra:2.2,cat:"verdura"},
+  {nombre:"Brócoli (100g)",kcal:34,prot:2.8,carbs:7,grasas:0.4,fibra:2.6,cat:"verdura"},
+  {nombre:"Zucchini (100g)",kcal:17,prot:1.2,carbs:3.1,grasas:0.3,fibra:1,cat:"verdura"},
+  {nombre:"Champiñones (100g)",kcal:22,prot:3.1,carbs:3.3,grasas:0.3,fibra:1,cat:"verdura"},
+  {nombre:"Zanahoria (100g)",kcal:41,prot:0.9,carbs:10,grasas:0.2,fibra:2.8,cat:"verdura"},
+  {nombre:"Leche de coco (100ml)",kcal:230,prot:2.3,carbs:5.5,grasas:23,fibra:0,cat:"grasa"},
+  {nombre:"Arándanos (100g)",kcal:57,prot:0.7,carbs:14,grasas:0.3,fibra:2.4,cat:"fruta"},
+  {nombre:"Manzana (1 mediana)",kcal:95,prot:0.5,carbs:25,grasas:0.3,fibra:4.4,cat:"fruta"},
+  {nombre:"Huevo entero (1 unidad)",kcal:72,prot:6,carbs:0.4,grasas:5,fibra:0,cat:"proteina"},
+];
+
+const MINUTA_SEMANAL = [
+  {dia:"Lunes",desayuno:"Mousse de coco con berries",almuerzo:"Hamburguesas de salmón y camote",cena:"Crema de champiñones + pollo a la plancha",colacion:"Trufas de vainilla y coco"},
+  {dia:"Martes",desayuno:"Chip de camote con palta",almuerzo:"Lasaña de zapallo italiano",cena:"Caldo de huesos con verduras",colacion:"Palta con sal de mar"},
+  {dia:"Miércoles",desayuno:"Pancakes de camote y plátano",almuerzo:"Pollo al horno con camote y brócoli",cena:"Crema de apio",colacion:"Arándanos con coco rallado"},
+  {dia:"Jueves",desayuno:"Mousse de coco con berries",almuerzo:"Salmón al horno con espinaca salteada",cena:"Hamburguesas de salmón y camote",colacion:"Tortilla de plátano verde con palta"},
+  {dia:"Viernes",desayuno:"Chip de camote con palta",almuerzo:"Carne de res con zucchini y zanahoria",cena:"Crema de champiñones + atún",colacion:"Trufas de vainilla y coco"},
+  {dia:"Sábado",desayuno:"Pancakes de camote y plátano",almuerzo:"Lasaña de zapallo italiano",cena:"Pollo al horno con ensalada de betarraga",colacion:"Manzana con coco"},
+  {dia:"Domingo",desayuno:"Mousse de coco con berries",almuerzo:"Caldo de huesos con pollo y verduras",cena:"Salmón con camote y espinaca",colacion:"Palta con sal de mar"},
+];
+
+// ── MACROS TAB ────────────────────────────────────────────────────────────────
+function MacrosTab({isPremium, onUpgrade}){
+  const [vista, setVista] = useState("macros"); // macros | minuta
+  const [registroMacros, setRegistroMacros] = useState([]);
+  const [busqueda, setBusqueda] = useState("");
+  const [metaProt, setMetaProt] = useState(80);
+  const [metaCarbs, setMetaCarbs] = useState(120);
+  const [metaGrasas, setMetaGrasas] = useState(60);
+  const [showMetas, setShowMetas] = useState(false);
+  const fechaHoy = new Date().toISOString().split("T")[0];
+
+  useEffect(()=>{
+    try{
+      const r=JSON.parse(localStorage.getItem("macros:hoy")||"{}");
+      if(r.fecha===fechaHoy)setRegistroMacros(r.items||[]);
+      const m=JSON.parse(localStorage.getItem("macros:metas")||"{}");
+      if(m.prot)setMetaProt(m.prot);
+      if(m.carbs)setMetaCarbs(m.carbs);
+      if(m.grasas)setMetaGrasas(m.grasas);
+    }catch{}
+  },[]);
+
+  async function guardarMacros(items){
+    setRegistroMacros(items);
+    localStorage.setItem("macros:hoy",JSON.stringify({fecha:fechaHoy,items}));
+  }
+
+  function saveMetas(){
+    localStorage.setItem("macros:metas",JSON.stringify({prot:metaProt,carbs:metaCarbs,grasas:metaGrasas}));
+    setShowMetas(false);
+  }
+
+  function agregarAlimento(a){
+    const nuevo=[...registroMacros,{...a,id:Date.now()}];
+    guardarMacros(nuevo);
+    setBusqueda("");
+  }
+
+  function quitarAlimento(id){
+    guardarMacros(registroMacros.filter(r=>r.id!==id));
+  }
+
+  const totales=registroMacros.reduce((acc,a)=>({
+    kcal:acc.kcal+(a.kcal||0),
+    prot:acc.prot+(a.prot||0),
+    carbs:acc.carbs+(a.carbs||0),
+    grasas:acc.grasas+(a.grasas||0),
+    fibra:acc.fibra+(a.fibra||0),
+  }),{kcal:0,prot:0,carbs:0,grasas:0,fibra:0});
+
+  const filtrados=busqueda.length>1?ALIMENTOS_MACROS.filter(a=>a.nombre.toLowerCase().includes(busqueda.toLowerCase())):[];
+
+  const BarraMacro=({label,val,meta,color})=>{
+    const pct=Math.min((val/meta)*100,100);
+    return(
+      <div style={{marginBottom:14}}>
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+          <span style={{fontSize:12,fontWeight:700,color:T.brown,fontFamily:FB}}>{label}</span>
+          <span style={{fontSize:12,color:T.stone}}><b style={{color}}>{Math.round(val)}g</b> / {meta}g</span>
+        </div>
+        <div style={{height:10,borderRadius:6,background:T.stonePale,overflow:"hidden"}}>
+          <div style={{height:"100%",width:`${pct}%`,borderRadius:6,background:color,transition:"width .4s"}}/>
+        </div>
+      </div>
+    );
+  };
+
+  if(!isPremium) return(
+    <div style={{padding:"56px 20px 96px",fontFamily:FB}}>
+      <h2 style={{fontFamily:FD,fontSize:26,color:T.brown,fontWeight:700,marginBottom:4}}>Macros & Minuta</h2>
+      <p style={{fontSize:12,color:T.stone,marginBottom:24}}>Contador de macros diarios y plan semanal AIP</p>
+      <PremiumLock onUpgrade={onUpgrade}/>
+    </div>
+  );
+
+  return(
+    <div style={{padding:"56px 20px 96px",fontFamily:FB}}>
+      <h2 style={{fontFamily:FD,fontSize:26,color:T.brown,fontWeight:700,marginBottom:4}}>Macros & Minuta</h2>
+      <p style={{fontSize:12,color:T.stone,marginBottom:16}}>Plan semanal y seguimiento diario</p>
+
+      {/* TABS */}
+      <div style={{display:"flex",background:T.stonePale,borderRadius:16,padding:4,marginBottom:20}}>
+        {[["macros","🥗 Macros del día"],["minuta","📅 Minuta semanal"]].map(([id,label])=>(
+          <button key={id} onClick={()=>setVista(id)} style={{flex:1,padding:"10px",borderRadius:12,border:"none",background:vista===id?T.warmWhite:"transparent",color:vista===id?T.brown:T.stone,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:FB}}>{label}</button>
+        ))}
+      </div>
+
+      {vista==="macros"&&(
+        <>
+          {/* RESUMEN KCAL */}
+          <div style={{borderRadius:20,background:`linear-gradient(135deg,${T.sage},${T.sageMid})`,padding:"20px",marginBottom:16,boxShadow:`0 8px 24px ${T.sage}44`}}>
+            <p style={{fontSize:11,color:"rgba(255,255,255,0.7)",letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:4}}>Calorías del día</p>
+            <p style={{fontFamily:FD,fontSize:36,fontWeight:700,color:"white"}}>{Math.round(totales.kcal)} <span style={{fontSize:16,fontWeight:400}}>kcal</span></p>
+            <p style={{fontSize:11,color:"rgba(255,255,255,0.6)",marginTop:4}}>{registroMacros.length} alimentos registrados hoy</p>
+          </div>
+
+          {/* BARRAS DE MACROS */}
+          <div style={{borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,padding:"20px",marginBottom:16}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+              <p style={{fontSize:11,fontWeight:700,color:T.stone,letterSpacing:"0.14em",textTransform:"uppercase"}}>Macronutrientes</p>
+              <button onClick={()=>setShowMetas(true)} style={{fontSize:11,color:T.sage,fontWeight:700,background:"none",border:`1px solid ${T.sage}`,borderRadius:10,padding:"4px 10px",cursor:"pointer",fontFamily:FB}}>⚙️ Metas</button>
+            </div>
+            <BarraMacro label="🥩 Proteína" val={totales.prot} meta={metaProt} color={T.terra}/>
+            <BarraMacro label="🍠 Carbohidratos" val={totales.carbs} meta={metaCarbs} color={T.sage}/>
+            <BarraMacro label="🥑 Grasas saludables" val={totales.grasas} meta={metaGrasas} color={T.brownMid}/>
+            <div style={{display:"flex",justifyContent:"space-between",padding:"10px 0",borderTop:`1px solid ${T.stonePale}`,marginTop:4}}>
+              <span style={{fontSize:12,color:T.stone}}>🌾 Fibra</span>
+              <span style={{fontSize:12,fontWeight:700,color:T.ok}}>{Math.round(totales.fibra)}g</span>
+            </div>
+          </div>
+
+          {/* BUSCADOR DE ALIMENTOS */}
+          <div style={{borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,padding:"20px",marginBottom:16}}>
+            <p style={{fontSize:11,fontWeight:700,color:T.stone,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:10}}>Agregar alimento</p>
+            <input value={busqueda} onChange={e=>setBusqueda(e.target.value)} placeholder="Buscar alimento AIP..." style={{width:"100%",padding:"12px 16px",borderRadius:14,border:`1.5px solid ${T.stoneMid}`,background:T.cream,fontSize:14,color:T.ink,outline:"none",fontFamily:FB,boxSizing:"border-box",marginBottom:busqueda.length>1?10:0}}/>
+            {filtrados.length>0&&(
+              <div style={{maxHeight:200,overflowY:"auto"}}>
+                {filtrados.map((a,i)=>(
+                  <button key={i} onClick={()=>agregarAlimento(a)} style={{width:"100%",display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 12px",borderRadius:12,border:"none",background:i%2===0?T.cream:T.warmWhite,cursor:"pointer",fontFamily:FB,marginBottom:2}}>
+                    <span style={{fontSize:13,color:T.brown,textAlign:"left"}}>{a.nombre}</span>
+                    <span style={{fontSize:11,color:T.stone,flexShrink:0,marginLeft:8}}>{a.kcal}kcal · P:{a.prot}g</span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {busqueda.length>1&&filtrados.length===0&&<p style={{fontSize:12,color:T.stone,textAlign:"center",padding:"10px 0"}}>No encontrado. Prueba otro término.</p>}
+          </div>
+
+          {/* LISTA DE LO COMIDO */}
+          {registroMacros.length>0&&(
+            <div style={{borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,padding:"16px",marginBottom:16}}>
+              <p style={{fontSize:11,fontWeight:700,color:T.stone,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:10}}>Registrado hoy</p>
+              {registroMacros.map((a)=>(
+                <div key={a.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:`1px solid ${T.stonePale}`}}>
+                  <div>
+                    <p style={{fontSize:13,fontWeight:600,color:T.brown}}>{a.nombre}</p>
+                    <p style={{fontSize:11,color:T.stone}}>P:{a.prot}g · C:{a.carbs}g · G:{a.grasas}g</p>
+                  </div>
+                  <button onClick={()=>quitarAlimento(a.id)} style={{background:"none",border:"none",cursor:"pointer",padding:"4px"}}><Trash2 size={14} color={T.stoneMid}/></button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* MODAL METAS */}
+          {showMetas&&(
+            <div style={{position:"fixed",inset:0,zIndex:200,background:"rgba(44,32,24,0.6)",display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={()=>setShowMetas(false)}>
+              <div onClick={e=>e.stopPropagation()} style={{width:"100%",maxWidth:480,borderRadius:"28px 28px 0 0",background:T.cream,padding:"24px 20px 40px",fontFamily:FB}}>
+                <div style={{display:"flex",justifyContent:"center",marginBottom:16}}><div style={{width:40,height:4,borderRadius:2,background:T.stoneMid}}/></div>
+                <h3 style={{fontFamily:FD,fontSize:18,color:T.brown,fontWeight:700,marginBottom:16}}>Personalizar metas</h3>
+                {[["🥩 Proteína (g)",metaProt,setMetaProt],[" 🍠 Carbohidratos (g)",metaCarbs,setMetaCarbs],["🥑 Grasas (g)",metaGrasas,setMetaGrasas]].map(([label,val,setVal])=>(
+                  <div key={label} style={{marginBottom:14}}>
+                    <p style={{fontSize:12,fontWeight:700,color:T.brown,marginBottom:6}}>{label}</p>
+                    <input type="number" value={val} onChange={e=>setVal(Number(e.target.value))} style={{width:"100%",padding:"12px 16px",borderRadius:14,border:`1.5px solid ${T.stoneMid}`,background:T.warmWhite,fontSize:16,color:T.ink,outline:"none",fontFamily:FB,boxSizing:"border-box"}}/>
+                  </div>
+                ))}
+                <button onClick={saveMetas} style={{width:"100%",padding:"14px",borderRadius:16,border:"none",background:`linear-gradient(135deg,${T.sage},${T.sageMid})`,color:"white",fontSize:14,fontWeight:700,cursor:"pointer",fontFamily:FB,marginTop:8}}>Guardar metas</button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {vista==="minuta"&&(
+        <div>
+          <div style={{borderRadius:16,background:T.sagePale,border:`1px solid ${T.sageLight}`,padding:"12px 16px",marginBottom:16}}>
+            <p style={{fontSize:12,color:T.sage,lineHeight:1.6}}>🌿 Minuta semanal diseñada según el Método Eri · Fase Eliminación. Todas las comidas son AIP.</p>
+          </div>
+          {MINUTA_SEMANAL.map((d,i)=>{
+            const esHoy=new Date().toLocaleDateString("es-CL",{weekday:"long"}).toLowerCase().includes(d.dia.toLowerCase());
+            return(
+              <div key={i} style={{borderRadius:20,background:T.warmWhite,border:`2px solid ${esHoy?T.sage:T.stonePale}`,padding:"16px",marginBottom:12,boxShadow:esHoy?`0 4px 16px ${T.sage}33`:"none"}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
+                  {esHoy&&<span style={{fontSize:9,fontWeight:800,color:"white",background:T.sage,padding:"3px 8px",borderRadius:8,letterSpacing:"0.1em"}}>HOY</span>}
+                  <p style={{fontFamily:FD,fontSize:16,fontWeight:700,color:esHoy?T.sage:T.brown}}>{d.dia}</p>
+                </div>
+                {[["🌅 Desayuno",d.desayuno],["☀️ Almuerzo",d.almuerzo],["🌙 Cena",d.cena],["🍎 Colación",d.colacion]].map(([tipo,comida])=>(
+                  <div key={tipo} style={{display:"flex",gap:10,marginBottom:8,alignItems:"flex-start"}}>
+                    <span style={{fontSize:11,color:T.stone,fontWeight:700,minWidth:72,flexShrink:0}}>{tipo}</span>
+                    <span style={{fontSize:12,color:T.brown,lineHeight:1.5}}>{comida}</span>
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── TAB BAR ───────────────────────────────────────────────────────────────────
 function TabBar({active,setActive}){
-  const tabs=[{id:"home",Icon:Heart,label:"Inicio"},{id:"pantry",Icon:ShoppingBag,label:"Despensa"},{id:"recipes",Icon:ChefHat,label:"Recetas"},{id:"sintomas",Icon:AlertCircle,label:"Síntomas"},{id:"profile",Icon:User,label:"Perfil"}];
+  const tabs=[{id:"home",Icon:Heart,label:"Inicio"},{id:"pantry",Icon:ShoppingBag,label:"Despensa"},{id:"recipes",Icon:ChefHat,label:"Recetas"},{id:"macros",Icon:Flame,label:"Macros"},{id:"sintomas",Icon:AlertCircle,label:"Síntomas"},{id:"profile",Icon:User,label:"Perfil"}];
   return(
     <nav style={{position:"fixed",bottom:0,left:0,right:0,zIndex:100,background:T.warmWhite,borderTop:`1px solid ${T.stonePale}`,display:"flex",justifyContent:"space-around",paddingTop:10,paddingBottom:"max(env(safe-area-inset-bottom),14px)"}}>
       {tabs.map(({id,Icon,label})=>{
@@ -1423,6 +1632,7 @@ export default function StopHashimoto(){
       {tab==="home"&&<HomeTab state={state} dispatch={dispatch} goTo={setTab} isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
       {tab==="pantry"&&<PantryTab state={state} dispatch={dispatch} isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
       {tab==="recipes"&&<RecipesTab state={state} dispatch={dispatch} isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
+      {tab==="macros"&&<MacrosTab isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
       {tab==="sintomas"&&<SintomasTab isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
       {tab==="profile"&&<ProfileTab state={state} dispatch={dispatch} isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
       <TabBar active={tab} setActive={setTab}/>
