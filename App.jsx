@@ -49,9 +49,9 @@ function PaywallScreen({onActivate}){
       <div style={{width:64,height:64,borderRadius:20,background:"rgba(255,255,255,0.1)",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:16,backdropFilter:"blur(10px)"}}>
         <Leaf size={28} color="white"/>
       </div>
-      <p style={{fontSize:11,color:"rgba(255,255,255,0.5)",letterSpacing:"0.2em",textTransform:"uppercase",marginBottom:6}}>Stop Hashimoto®</p>
+      <p style={{fontSize:11,color:"rgba(255,255,255,0.5)",letterSpacing:"0.2em",textTransform:"uppercase",marginBottom:6}}>Proyecto Stop Hashimoto®</p>
       <h1 style={{fontFamily:FD,fontSize:28,color:"white",fontWeight:700,textAlign:"center",marginBottom:6,lineHeight:1.2}}>Tu app para sanar{"\n"}desde la raíz</h1>
-      <p style={{fontSize:13,color:"rgba(255,255,255,0.6)",textAlign:"center",marginBottom:32,lineHeight:1.6}}>Recetas AIP · IA nutricional · Método Eri</p>
+      <p style={{fontSize:13,color:"rgba(255,255,255,0.6)",textAlign:"center",marginBottom:32,lineHeight:1.6}}>Nutrición · Estilo de vida · Método Eri</p>
 
       {/* TABS */}
       <div style={{display:"flex",background:"rgba(255,255,255,0.1)",borderRadius:16,padding:4,marginBottom:24,width:"100%",maxWidth:340}}>
@@ -68,7 +68,7 @@ function PaywallScreen({onActivate}){
               <div><p style={{fontSize:14,fontWeight:700,color:"white",marginBottom:2}}>Plan Gratuito</p><p style={{fontSize:11,color:"rgba(255,255,255,0.5)"}}>Sin tarjeta requerida</p></div>
               <span style={{fontSize:20,fontWeight:800,color:"rgba(255,255,255,0.4)"}}>$0</span>
             </div>
-            {["3 recetas de almuerzo del Método Eri","Agregar ingredientes a mano","Guía de fases AIP"].map(f=>(
+            {["3 recetas del Método Eri para empezar","Agregar ingredientes a tu despensa","Guía completa de fases del Método Eri"].map(f=>(
               <div key={f} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
                 <CheckCircle size={12} color="rgba(255,255,255,0.3)"/>
                 <span style={{fontSize:12,color:"rgba(255,255,255,0.5)"}}>{f}</span>
@@ -93,7 +93,7 @@ function PaywallScreen({onActivate}){
                 <p style={{fontSize:10,color:"rgba(255,255,255,0.7)"}}>/mes</p>
               </div>
             </div>
-            {["10 recetas AIP Método Eri","IA identificador de alimentos","Verificador de etiquetas AIP","Generador de recetas con IA","Seguimiento de síntomas","Plan semanal + macros"].map(f=>(
+            {["10 recetas del Método Eri por fase","IA identificadora de alimentos y etiquetas","Generador de recetas personalizadas con IA","Seguimiento de síntomas y energía","Plan semanal + contador de macros","Acceso ilimitado a toda la app"].map(f=>(
               <div key={f} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
                 <CheckCircle size={12} color="white"/>
                 <span style={{fontSize:12,color:"white"}}>{f}</span>
@@ -352,7 +352,7 @@ function Err({msg,onRetry,onClose}){
 
 // ── ONBOARDING ────────────────────────────────────────────────────────────────
 const STEPS=[
-  {id:"bienvenida",title:"Bienvenida a\nStop Hashimoto™",sub:"Tu coach de nutrición con el Método Eri personalizada. Juntas vamos a ordenar tu alimentación para calmar tu sistema inmune y apoyar tu tiroides.",fields:[]},
+  {id:"bienvenida",title:"Bienvenida a\nProyecto Stop Hashimoto®",sub:"Tu coach de nutrición con el Método Eri personalizada. Juntas vamos a ordenar tu alimentación y estilo de vida para calmar tu sistema inmune y apoyar tu tiroides.",fields:[]},
   {id:"basicos",title:"Cuéntame\nsobre ti",fields:[
     {key:"nombre",label:"¿Cómo te llamas?",type:"text",ph:"Tu nombre"},
     {key:"edad",label:"Edad",type:"number",ph:"ej. 35"},
@@ -374,10 +374,10 @@ const STEPS=[
     {key:"notas",label:"Alergias, intolerancias u otras condiciones",type:"area",ph:"ej. Tengo SIBO, no tolero mariscos..."},
   ]},
 ];
-function Onboarding({onDone}){
+function Onboarding({onDone, existingProfile}){
   const [step,setStep]=useState(0);
-  const [data,setData]=useState({});
-  const [multi,setMulti]=useState({});
+  const [data,setData]=useState(existingProfile||{});
+  const [multi,setMulti]=useState(existingProfile?.sintomas?{sintomas:existingProfile.sintomas}:{});
   const s=STEPS[step];
   const pct=step/(STEPS.length-1)*100;
   const sf=(k,v)=>setData(d=>({...d,[k]:v}));
@@ -392,7 +392,7 @@ function Onboarding({onDone}){
       <div style={{padding:"52px 24px 16px"}}>
         <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:20}}>
           <Leaf size={16} color={T.sage}/>
-          <span style={{fontSize:11,fontWeight:700,letterSpacing:"0.18em",color:T.sage,textTransform:"uppercase"}}>Stop Hashimoto</span>
+          <span style={{fontSize:11,fontWeight:700,letterSpacing:"0.18em",color:T.sage,textTransform:"uppercase"}}>Proyecto Stop Hashimoto®</span>
         </div>
         {step>0&&<div style={{height:3,borderRadius:99,background:T.stonePale,overflow:"hidden"}}>
           <div style={{height:"100%",width:`${pct}%`,background:`linear-gradient(90deg,${T.sage},${T.sageMid})`,borderRadius:99,transition:"width .5s"}}/>
@@ -682,21 +682,36 @@ function BienestarSection(){
   );
 }
 
+// ── PROFILE AVATAR ─────────────────────────────────────────────────────────
+function ProfileAvatar({size=48,profile,onGoProfile}){
+  const [photoURL,setPhotoURL]=useState(null);
+  useEffect(()=>{
+    try{const p=localStorage.getItem("profile:photo");if(p)setPhotoURL(p);}catch{}
+  },[]);
+  const r=size/2;const br=Math.round(size*0.33);
+  return(
+    <button onClick={onGoProfile} style={{width:size,height:size,borderRadius:br,background:`linear-gradient(135deg,${T.sage},${T.sageMid})`,display:"flex",alignItems:"center",justifyContent:"center",border:"none",cursor:"pointer",overflow:"hidden",padding:0,flexShrink:0,boxShadow:`0 4px 12px ${T.sage}44`}}>
+      {photoURL
+        ?<img src={photoURL} alt="perfil" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+        :<span style={{fontFamily:FD,fontSize:Math.round(size*0.4),fontWeight:700,color:"white"}}>{profile?.nombre?profile.nombre[0].toUpperCase():"?"}</span>
+      }
+    </button>
+  );
+}
+
 // ── HOME ──────────────────────────────────────────────────────────────────────
 function HomeTab({state,goTo,isPremium,onUpgrade}){
   const {profile,pantry,recipesHistory}=state;
   const hr=new Date().getHours();
   const greet=hr<12?"Buenos días":hr<20?"Buenas tardes":"Buenas noches";
   return(
-    <div style={{padding:"56px 20px 96px",fontFamily:FB}}>
+    <div style={{padding:"56px 20px 96px",fontFamily:FB,background:`linear-gradient(180deg,${T.sagePale} 0%,${T.cream} 200px)`}}>
       <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:24}}>
         <div>
           <p style={{fontSize:13,color:T.stone,marginBottom:2}}>{greet},</p>
           <h1 style={{fontFamily:FD,fontSize:28,color:T.brown,fontWeight:700}}>{profile?.nombre||"Coach"}</h1>
         </div>
-        <div style={{width:48,height:48,borderRadius:16,background:`linear-gradient(135deg,${T.sage},${T.sageMid})`,display:"flex",alignItems:"center",justifyContent:"center"}}>
-          <Leaf size={20} color="white"/>
-        </div>
+        <ProfileAvatar size={48} profile={profile} onGoProfile={()=>goTo("profile")}/>
       </div>
 
       {/* FASE ACTUAL */}
@@ -704,10 +719,10 @@ function HomeTab({state,goTo,isPremium,onUpgrade}){
         <div style={{position:"absolute",right:-20,top:-20,width:100,height:100,borderRadius:"50%",background:"rgba(255,255,255,0.06)"}}/>
         <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
           <Sparkles size={12} color="rgba(255,255,255,0.75)"/>
-          <span style={{fontSize:10,color:"rgba(255,255,255,0.75)",fontWeight:700,letterSpacing:"0.18em",textTransform:"uppercase"}}>Método Eri · Stop Hashimoto</span>
+          <span style={{fontSize:10,color:"rgba(255,255,255,0.75)",fontWeight:700,letterSpacing:"0.18em",textTransform:"uppercase"}}>Método Eri · Proyecto Stop Hashimoto®</span>
         </div>
         <p style={{fontFamily:FD,fontSize:22,color:"white",fontWeight:700,marginBottom:4}}>{profile?.fase_eri||"Eliminación"}</p>
-        <p style={{fontSize:12,color:"rgba(255,255,255,0.65)"}}>Sin gluten · Sin lácteos · Sin azúcar · Sin solanáceas</p>
+        <p style={{fontSize:12,color:"rgba(255,255,255,0.65)"}}>Nutrición · Estilo de vida · Sin gluten siempre</p>
       </div>
 
       {/* ESTADÍSTICAS */}
@@ -890,7 +905,7 @@ function PantryTab({state,dispatch,isPremium,onUpgrade}){
         <div style={{display:"flex",alignItems:"center",gap:12}}>
           <span style={{fontSize:22}}>🏷️</span>
           <div style={{textAlign:"left"}}>
-            <p style={{fontSize:13,fontWeight:700,color:"white",fontFamily:FB}}>Verificar etiqueta AIP</p>
+            <p style={{fontSize:13,fontWeight:700,color:"white",fontFamily:FB}}>Verificar etiqueta Método Eri</p>
             <p style={{fontSize:11,color:"rgba(255,255,255,0.75)"}}>{isPremium?`${etiquetasHoy}/${LIMITE_ETIQUETAS} fotos usadas hoy`:"Premium"}</p>
           </div>
         </div>
@@ -1305,14 +1320,38 @@ function RecipesTab({state,dispatch,isPremium,onUpgrade}){
 function ProfileTab({state,dispatch,isPremium,onUpgrade}){
   const {profile}=state;
   const [confirm,setConfirm]=useState(false);
+  const [photoURL,setPhotoURL]=useState(null);
+  const photoRef=useRef();
+  useEffect(()=>{try{const p=localStorage.getItem("profile:photo");if(p)setPhotoURL(p);}catch{}});
+  function handlePhoto(e){
+    const file=e.target.files?.[0];if(!file)return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      const url=ev.target.result;
+      localStorage.setItem("profile:photo",url);
+      setPhotoURL(url);
+    };
+    reader.readAsDataURL(file);
+  }
   if(!profile)return null;
   const rows=[["Edad",profile.edad?`${profile.edad} años`:"—"],["Peso",profile.peso?`${profile.peso} kg`:"—"],["Altura",profile.altura?`${profile.altura} cm`:"—"],["Actividad",profile.actividad||"—"],["Sueño",profile.sueno?`${profile.sueno} h`:"—"],["Estrés",profile.estres||"—"],["Diagnóstico",profile.tiempo_dx||"—"],["Fase Método Eri",profile.fase_eri||"—"],["Objetivo",profile.objetivo||"—"]];
   return(
     <div style={{padding:"56px 20px 96px",fontFamily:FB}}>
       <div style={{display:"flex",flexDirection:"column",alignItems:"center",marginBottom:28}}>
-        <div style={{width:72,height:72,borderRadius:22,background:`linear-gradient(135deg,${T.sage},${T.sageMid})`,display:"flex",alignItems:"center",justifyContent:"center",marginBottom:12,boxShadow:`0 8px 24px ${T.sage}44`}}><Leaf size={30} color="white"/></div>
+        <div style={{position:"relative",marginBottom:12}}>
+          <div style={{width:88,height:88,borderRadius:26,background:`linear-gradient(135deg,${T.sage},${T.sageMid})`,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 8px 24px ${T.sage}44`,overflow:"hidden"}}>
+            {photoURL
+              ?<img src={photoURL} alt="perfil" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+              :<span style={{fontFamily:FD,fontSize:36,fontWeight:700,color:"white"}}>{profile?.nombre?profile.nombre[0].toUpperCase():"?"}</span>
+            }
+          </div>
+          <input ref={photoRef} type="file" accept="image/*" style={{display:"none"}} onChange={handlePhoto}/>
+          <button onClick={()=>photoRef.current?.click()} style={{position:"absolute",bottom:-4,right:-4,width:28,height:28,borderRadius:10,background:T.terra,border:"2px solid white",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
+            <Camera size={12} color="white"/>
+          </button>
+        </div>
         <h2 style={{fontFamily:FD,fontSize:22,fontWeight:700,color:T.brown}}>{profile.nombre||"Tu perfil"}</h2>
-        <span style={{fontSize:11,padding:"5px 14px",borderRadius:20,background:T.sagePale,color:T.sage,fontWeight:700,marginTop:6}}>Stop Hashimoto · Método Eri</span>
+        <span style={{fontSize:11,padding:"5px 14px",borderRadius:20,background:T.sagePale,color:T.sage,fontWeight:700,marginTop:6}}>Proyecto Stop Hashimoto® · Método Eri</span>
       </div>
 
       {/* MEMBRESÍA */}
@@ -1320,7 +1359,7 @@ function ProfileTab({state,dispatch,isPremium,onUpgrade}){
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div>
             <p style={{fontSize:11,fontWeight:700,color:isPremium?T.terra:T.stone,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:4}}>{isPremium?"✨ Plan Premium":"Plan Gratuito"}</p>
-            <p style={{fontSize:12,color:T.brownMid,lineHeight:1.5}}>{isPremium?"Acceso a 10 recetas + todas las funciones IA":"Acceso limitado · 1 receta por categoría"}</p>
+            <p style={{fontSize:12,color:T.brownMid,lineHeight:1.5}}>{isPremium?"Acceso completo al Método Eri con IA":"Acceso limitado · Empieza a sanar hoy"}</p>
           </div>
           {!isPremium&&<button onClick={onUpgrade} style={{padding:"9px 16px",borderRadius:12,border:"none",background:`linear-gradient(135deg,${T.terra},${T.terraLight})`,color:"white",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:FB,flexShrink:0,marginLeft:12}}>Upgrade →</button>}
         </div>
@@ -1341,10 +1380,28 @@ function ProfileTab({state,dispatch,isPremium,onUpgrade}){
         <p style={{fontSize:13,color:T.brown,lineHeight:1.6}}>{profile.notas}</p>
       </div>}
       <div style={{borderRadius:20,background:T.sagePale,border:`1px solid ${T.sageLight}`,padding:"16px",marginBottom:16}}>
-        <p style={{fontSize:11,fontWeight:700,color:T.sage,marginBottom:4}}>🌿 Stop Hashimoto Program</p>
+        <p style={{fontSize:11,fontWeight:700,color:T.sage,marginBottom:4}}>🌿 Proyecto Stop Hashimoto®</p>
         <p style={{fontSize:12,color:T.sage,lineHeight:1.6}}>Coach certificada · Instituto IIN Nueva York · Especialista en enfermedades autoinmunes y Método Eri</p>
       </div>
-      <SuplementosSection/>
+      {isPremium&&<SuplementosSection/>}
+      {!isPremium&&<div style={{borderRadius:20,background:`linear-gradient(135deg,${T.terra}11,${T.terraLight}11)`,border:`1.5px solid ${T.terra}33`,padding:"16px",marginBottom:16,textAlign:"center"}}>
+        <p style={{fontSize:20,marginBottom:6}}>💊</p>
+        <p style={{fontFamily:FD,fontSize:14,fontWeight:700,color:T.brown,marginBottom:4}}>Protocolo de Suplementos</p>
+        <p style={{fontSize:12,color:T.stone,lineHeight:1.6,marginBottom:12}}>Accede al protocolo completo de suplementos para Hashimoto con dosis, horarios e interacciones.</p>
+        <button onClick={onUpgrade} style={{padding:"10px 20px",borderRadius:12,border:"none",background:`linear-gradient(135deg,${T.terra},${T.terraLight})`,color:"white",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:FB}}>Desbloquear con Premium →</button>
+      </div>}
+
+      {/* DARSE DE BAJA */}
+      <div style={{borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,padding:"16px",marginBottom:12}}>
+        <p style={{fontSize:11,fontWeight:700,color:T.stone,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:4}}>Gestión de cuenta</p>
+        <p style={{fontSize:12,color:T.stone,lineHeight:1.6,marginBottom:12}}>Si tienes un plan de pago, puedes cancelar tu suscripción directamente desde Lemon Squeezy.</p>
+        <button onClick={()=>window.open("https://app.lemonsqueezy.com/my-orders","_blank")} style={{width:"100%",padding:"11px",borderRadius:14,border:`1px solid ${T.stoneMid}`,background:"transparent",color:T.brownMid,fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:FB,marginBottom:8}}>
+          Gestionar mi suscripción →
+        </button>
+        <p style={{fontSize:11,color:T.stone,textAlign:"center",marginBottom:4}}>¿Necesitas ayuda? Escríbenos a</p>
+        <p style={{fontSize:11,color:T.terra,textAlign:"center",fontWeight:700}}>dinkahealthcoach@gmail.com</p>
+      </div>
+
       {confirm?<div style={{borderRadius:18,background:"#FDECEA",border:`1px solid ${T.error}33`,padding:"16px"}}>
         <p style={{fontSize:13,fontWeight:700,color:T.error,marginBottom:12}}>¿Estás segura de reiniciar todo tu perfil y despensa?</p>
         <div style={{display:"flex",gap:8}}>
@@ -1995,7 +2052,7 @@ function MacrosTab({isPremium, onUpgrade}){
   if(!isPremium) return(
     <div style={{padding:"56px 20px 96px",fontFamily:FB}}>
       <h2 style={{fontFamily:FD,fontSize:26,color:T.brown,fontWeight:700,marginBottom:4}}>Macros & Minuta</h2>
-      <p style={{fontSize:12,color:T.stone,marginBottom:24}}>Contador de macros diarios y plan semanal AIP</p>
+      <p style={{fontSize:12,color:T.stone,marginBottom:24}}>Contador de macros diarios y plan semanal Método Eri</p>
       <PremiumLock onUpgrade={onUpgrade}/>
     </div>
   );
@@ -2091,7 +2148,7 @@ function MacrosTab({isPremium, onUpgrade}){
       {vista==="minuta"&&(
         <div>
           <div style={{borderRadius:16,background:T.sagePale,border:`1px solid ${T.sageLight}`,padding:"12px 16px",marginBottom:16}}>
-            <p style={{fontSize:12,color:T.sage,lineHeight:1.6}}>🌿 Minuta semanal diseñada según el Método Eri · Fase Eliminación. Todas las comidas son AIP.</p>
+            <p style={{fontSize:12,color:T.sage,lineHeight:1.6}}>🌿 Minuta semanal diseñada según el Método Eri · Fase Eliminación. Todas las comidas son del protocolo.</p>
           </div>
           {MINUTA_SEMANAL.map((d,i)=>{
             const esHoy=new Date().toLocaleDateString("es-CL",{weekday:"long"}).toLowerCase().includes(d.dia.toLowerCase());
@@ -2168,12 +2225,12 @@ export default function StopHashimoto(){
 
   const isPremium=membership?.type==="premium";
 
-  if(!ready)return<div style={{minHeight:"100svh",background:T.cream,display:"flex",alignItems:"center",justifyContent:"center"}}><Spin msg="Cargando Stop Hashimoto…"/></div>;
+  if(!ready)return<div style={{minHeight:"100svh",background:`linear-gradient(160deg,${T.sagePale} 0%,${T.cream} 100%)`,display:"flex",alignItems:"center",justifyContent:"center"}}><Spin msg="Cargando Stop Hashimoto®…"/></div>;
 
   // Mostrar paywall si no tiene membresía aún
   if(!membership)return<PaywallScreen onActivate={handleActivate}/>;
 
-  if(!state.profile)return<Onboarding onDone={onboard}/>;
+  if(!state.profile)return<Onboarding onDone={onboard} existingProfile={state.profile}/>;
 
   // Overlay de upgrade
   if(showPaywall)return<PaywallScreen onActivate={handleActivate}/>;
