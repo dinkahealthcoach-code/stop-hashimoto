@@ -1394,12 +1394,10 @@ function ProfileTab({state,dispatch,isPremium,onUpgrade}){
       {/* DARSE DE BAJA */}
       <div style={{borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,padding:"16px",marginBottom:12}}>
         <p style={{fontSize:11,fontWeight:700,color:T.stone,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:4}}>Gestión de cuenta</p>
-        <p style={{fontSize:12,color:T.stone,lineHeight:1.6,marginBottom:12}}>Si tienes un plan de pago, puedes cancelar tu suscripción directamente desde Lemon Squeezy.</p>
-        <button onClick={()=>window.open("https://app.lemonsqueezy.com/my-orders","_blank")} style={{width:"100%",padding:"11px",borderRadius:14,border:`1px solid ${T.stoneMid}`,background:"transparent",color:T.brownMid,fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:FB,marginBottom:8}}>
-          Gestionar mi suscripción →
+        <p style={{fontSize:12,color:T.stone,lineHeight:1.6,marginBottom:12}}>¿Deseas cancelar tu suscripción? Escríbenos y lo gestionamos en menos de 24 horas.</p>
+        <button onClick={()=>window.open(`mailto:dinkahealthcoach@gmail.com?subject=Solicitud%20de%20cancelaci%C3%B3n%20-%20Stop%20Hashimoto&body=Hola%20Dinka%2C%0A%0ASolicito%20cancelar%20mi%20suscripci%C3%B3n%20al%20Proyecto%20Stop%20Hashimoto.%0A%0ANombre%3A%20${encodeURIComponent(profile?.nombre||"")}%0AEmail%3A%20%0A%0AGracias.`,"_blank")} style={{width:"100%",padding:"12px",borderRadius:14,border:`1px solid ${T.stoneMid}`,background:"transparent",color:T.brownMid,fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:FB}}>
+          ✉️ Solicitar cancelación por email
         </button>
-        <p style={{fontSize:11,color:T.stone,textAlign:"center",marginBottom:4}}>¿Necesitas ayuda? Escríbenos a</p>
-        <p style={{fontSize:11,color:T.terra,textAlign:"center",fontWeight:700}}>dinkahealthcoach@gmail.com</p>
       </div>
 
       {confirm?<div style={{borderRadius:18,background:"#FDECEA",border:`1px solid ${T.error}33`,padding:"16px"}}>
