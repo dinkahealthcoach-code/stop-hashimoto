@@ -20,8 +20,31 @@ const FREE_RECIPES_LIMIT = 3; // 3 recetas de almuerzo solamente
 const PREMIUM_RECIPES_PER_CAT = 2; // 2 recetas por categoría
 
 // ── MEMBERSHIP HELPERS ────────────────────────────────────────────────────────
-async function getMembership(){try{const r=localStorage.getItem("membership:status");return r?JSON.parse(r):null;}catch{return null;}}
+async function getMembership(email){
+  if(!email){
+    // Fallback: leer email guardado localmente
+    try{const cached=localStorage.getItem("membership:status");if(cached){const p=JSON.parse(cached);if(p?.email)return getMembership(p.email);}return null;}catch{return null;}
+  }
+  try{
+    const r=await fetch("/api/verify-membership",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})});
+    const data=await r.json();
+    const mem={type:data?.membership==="premium"?"premium":"free",email,checkedAt:Date.now()};
+    localStorage.setItem("membership:status",JSON.stringify(mem));
+    return mem;
+  }catch{
+    // Si falla la red, usar caché local
+    try{const cached=localStorage.getItem("membership:status");return cached?JSON.parse(cached):null;}catch{return null;}
+  }
+}
 async function setMembership(data){try{localStorage.setItem("membership:status",JSON.stringify(data));}catch{}}
+
+// ── SUPABASE HELPERS ──────────────────────────────────────────────────────────
+async function saveToDB(table,email,data){
+  try{await fetch("/api/db",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({table,email,data})});}catch(e){console.error("saveToDB error:",e);}
+}
+async function getFromDB(table,email){
+  try{const r=await fetch("/api/db",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({table,email,action:"get"})});return r.json();}catch{return null;}
+}
 
 // ── PAYWALL SCREEN ────────────────────────────────────────────────────────────
 function PaywallScreen({onActivate}){
@@ -32,14 +55,20 @@ function PaywallScreen({onActivate}){
 
   async function handleCode(){
     if(!code.trim()){setErr("Ingresa tu email de compra.");return;}
+    if(!code.includes("@")){setErr("Ingresa un email válido.");return;}
     setLoading(true);setErr(null);
-    // Simulación de verificación — en producción conectar con webhook de Lemon Squeezy
-    await new Promise(r=>setTimeout(r,1200));
-    if(code.toLowerCase().includes("@")){
-      await setMembership({type:"premium",email:code.toLowerCase(),activatedAt:Date.now()});
-      onActivate("premium");
-    } else {
-      setErr("Email no encontrado. Verifica que sea el mismo con el que compraste.");
+    try{
+      const r=await fetch("/api/verify-membership",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:code.toLowerCase().trim()})});
+      const data=await r.json();
+      if(data?.membership==="premium"){
+        const mem={type:"premium",email:code.toLowerCase().trim(),activatedAt:Date.now()};
+        await setMembership(mem);
+        onActivate("premium");
+      } else {
+        setErr("Email no encontrado. Verifica que sea el mismo con el que compraste en Lemon Squeezy.");
+      }
+    }catch{
+      setErr("Error de conexión. Intenta de nuevo en unos segundos.");
     }
     setLoading(false);
   }
@@ -169,7 +198,19 @@ function reducer(state, action) {
   }
 }
 async function dbGet(k){try{const r=localStorage.getItem(k);return r?JSON.parse(r):null;}catch{return null;}}
-async function dbSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
+async function dbSet(k,v){
+  try{
+    localStorage.setItem(k,JSON.stringify(v));
+    const mem=localStorage.getItem("membership:status");
+    const email=mem?JSON.parse(mem)?.email:null;
+    if(email){
+      const tableMap={"pantry:items":"pantry","history:recipes":"recipes_history","sintomas:registros":"symptoms","macros:hoy":"macros","profile:user":"profiles"};
+      const dataKeyMap={"pantry:items":"items","history:recipes":"items","sintomas:registros":"registros","macros:hoy":"data","profile:user":"profile_data"};
+      const table=tableMap[k];
+      if(table){await saveToDB(table,email,{[dataKeyMap[k]]:v});}
+    }
+  }catch(e){console.error("dbSet error:",e);}
+}
 
 // ── API ───────────────────────────────────────────────────────────────────────
 function pj(text){
@@ -2202,10 +2243,27 @@ export default function StopHashimoto(){
   useEffect(()=>{
     (async()=>{
       try{
+        const cachedMem=localStorage.getItem("membership:status");
+        const cachedEmail=cachedMem?JSON.parse(cachedMem)?.email:null;
         const [profile,pantry,recipes,mem]=await Promise.all([
-          dbGet("profile:user"),dbGet("pantry:items"),dbGet("history:recipes"),getMembership()
+          dbGet("profile:user"),dbGet("pantry:items"),dbGet("history:recipes"),getMembership(cachedEmail)
         ]);
-        dispatch({type:"LOAD",p:{profile:profile||null,pantry:pantry||[],recipesHistory:recipes||[],ticketsHistory:[]}});
+        const email=mem?.email||cachedEmail;
+        if(email){
+          const [dbProfile,dbPantry,dbRecipes]=await Promise.all([
+            getFromDB("profiles",email),
+            getFromDB("pantry",email),
+            getFromDB("recipes_history",email),
+          ]);
+          dispatch({type:"LOAD",p:{
+            profile:dbProfile?.profile_data||profile||null,
+            pantry:dbPantry?.items||pantry||[],
+            recipesHistory:dbRecipes?.items||recipes||[],
+            ticketsHistory:[]
+          }});
+        } else {
+          dispatch({type:"LOAD",p:{profile:profile||null,pantry:pantry||[],recipesHistory:recipes||[],ticketsHistory:[]}});
+        }
         setMembershipState(mem||null);
       }catch{}
       setReady(true);
