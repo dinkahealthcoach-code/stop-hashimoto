@@ -1,5 +1,24 @@
 import crypto from "crypto";
 
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_SECRET_KEY;
+
+async function supabase(method, table, body = null, match = null) {
+  let url = `${SUPABASE_URL}/rest/v1/${table}`;
+  if (match) url += `?${match}`;
+  const res = await fetch(url, {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      "apikey": SUPABASE_KEY,
+      "Authorization": `Bearer ${SUPABASE_KEY}`,
+      "Prefer": method === "POST" ? "resolution=merge-duplicates" : "",
+    },
+    body: body ? JSON.stringify(body) : null,
+  });
+  return res;
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -7,8 +26,6 @@ export default async function handler(req, res) {
 
   const secret = process.env.LEMON_WEBHOOK_SECRET;
   const signature = req.headers["x-signature"];
-
-  // Verificar firma del webhook
   const body = JSON.stringify(req.body);
   const hmac = crypto.createHmac("sha256", secret).update(body).digest("hex");
 
@@ -19,43 +36,28 @@ export default async function handler(req, res) {
   const event = req.body;
   const eventName = event.meta?.event_name;
   const email = event.data?.attributes?.user_email;
-  const status = event.data?.attributes?.status;
 
-  // Eventos que activan o desactivan membresía premium
-  const eventosActivos = [
-    "subscription_created",
-    "subscription_resumed",
-    "subscription_unpaused",
-  ];
+  if (!email) return res.status(200).json({ received: true });
 
-  const eventosInactivos = [
-    "subscription_cancelled",
-    "subscription_expired",
-    "subscription_paused",
-  ];
+  const activos = ["subscription_created", "subscription_resumed", "subscription_unpaused"];
+  const inactivos = ["subscription_cancelled", "subscription_expired", "subscription_paused"];
 
-  if (!email) {
-    return res.status(200).json({ received: true });
+  if (activos.includes(eventName)) {
+    await supabase("POST", "profiles", {
+      email,
+      membership: "premium",
+      updated_at: new Date().toISOString(),
+    }, "email=eq." + email);
+    console.log(`✅ Premium activado: ${email}`);
   }
 
-  if (eventosActivos.includes(eventName)) {
-    // Guardar membresía activa — el cliente la leerá desde localStorage
-    // En producción real conectar con una base de datos
-    console.log(`✅ Membresía ACTIVADA para: ${email}`);
-    return res.status(200).json({ 
-      received: true, 
-      action: "activated",
-      email 
-    });
-  }
-
-  if (eventosInactivos.includes(eventName)) {
-    console.log(`❌ Membresía CANCELADA para: ${email}`);
-    return res.status(200).json({ 
-      received: true, 
-      action: "deactivated",
-      email 
-    });
+  if (inactivos.includes(eventName)) {
+    await supabase("POST", "profiles", {
+      email,
+      membership: "free",
+      updated_at: new Date().toISOString(),
+    }, "email=eq." + email);
+    console.log(`❌ Premium cancelado: ${email}`);
   }
 
   return res.status(200).json({ received: true });
