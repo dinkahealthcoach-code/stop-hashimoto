@@ -52,6 +52,27 @@ function PaywallScreen({onActivate}){
   const [loading,setLoading]=useState(false);
   const [err,setErr]=useState(null);
   const [tab,setTab]=useState("planes"); // planes | codigo
+  const [showAlumnaCheck,setShowAlumnaCheck]=useState(false);
+  const [alumnaEmail,setAlumnaEmail]=useState("");
+  const [alumnaLoading,setAlumnaLoading]=useState(false);
+  const [alumnaErr,setAlumnaErr]=useState(null);
+
+  async function handleAlumnaCheck(){
+    if(!alumnaEmail.trim()||!alumnaEmail.includes("@")){setAlumnaErr("Ingresa un email válido.");return;}
+    setAlumnaLoading(true);setAlumnaErr(null);
+    try{
+      const r=await fetch("/api/verify-alumna",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:alumnaEmail.toLowerCase().trim()})});
+      const data=await r.json();
+      if(data?.autorizada){
+        window.open(HOTMART_COMUNIDAD_URL,"_blank");
+      } else {
+        setAlumnaErr("No encontramos ese email entre nuestras alumnas. Si crees que es un error, escríbenos a dinkahealthcoach@gmail.com");
+      }
+    }catch{
+      setAlumnaErr("Error de conexión. Intenta de nuevo en unos segundos.");
+    }
+    setAlumnaLoading(false);
+  }
 
   async function handleCode(){
     if(!code.trim()){setErr("Ingresa tu email de compra.");return;}
@@ -154,12 +175,25 @@ function PaywallScreen({onActivate}){
                 <span style={{fontSize:12,color:"rgba(255,255,255,0.85)"}}>{f}</span>
               </div>
             ))}
-            <button onClick={()=>window.open(HOTMART_COMUNIDAD_URL,"_blank")} style={{width:"100%",marginTop:14,padding:"14px",borderRadius:14,border:"none",background:T.sageMid,color:"white",fontSize:14,fontWeight:800,cursor:"pointer",fontFamily:FB,boxShadow:`0 4px 16px ${T.sage}44`}}>
-              Soy alumna, empezar →
-            </button>
-            <p style={{fontSize:11,color:"rgba(255,255,255,0.4)",textAlign:"center",marginTop:10,lineHeight:1.6}}>
-              Ya compraste el Proyecto Stop Hashimoto®. Después de suscribirte, activa tu acceso en la pestaña <b style={{color:"rgba(255,255,255,0.65)"}}>"Ya tengo acceso"</b> con el mismo email.
-            </p>
+            {!showAlumnaCheck?(
+              <>
+                <button onClick={()=>setShowAlumnaCheck(true)} style={{width:"100%",marginTop:14,padding:"14px",borderRadius:14,border:"none",background:T.sageMid,color:"white",fontSize:14,fontWeight:800,cursor:"pointer",fontFamily:FB,boxShadow:`0 4px 16px ${T.sage}44`}}>
+                  Soy alumna, empezar →
+                </button>
+                <p style={{fontSize:11,color:"rgba(255,255,255,0.4)",textAlign:"center",marginTop:10,lineHeight:1.6}}>
+                  Ya compraste el Proyecto Stop Hashimoto®. Verificaremos tu email antes de llevarte al pago.
+                </p>
+              </>
+            ):(
+              <div style={{marginTop:14}}>
+                <p style={{fontSize:11,color:"rgba(255,255,255,0.6)",marginBottom:8,lineHeight:1.5}}>Ingresa el email con el que compraste el Proyecto Stop Hashimoto®:</p>
+                <input value={alumnaEmail} onChange={e=>setAlumnaEmail(e.target.value)} placeholder="tu@email.com" style={{width:"100%",padding:"12px 14px",borderRadius:12,border:"1px solid rgba(255,255,255,0.2)",background:"rgba(255,255,255,0.05)",color:"white",fontSize:13,fontFamily:FB,boxSizing:"border-box",outline:"none"}}/>
+                {alumnaErr&&<p style={{fontSize:11,color:T.terraLight,marginTop:8,lineHeight:1.5}}>{alumnaErr}</p>}
+                <button onClick={handleAlumnaCheck} disabled={alumnaLoading} style={{width:"100%",marginTop:10,padding:"14px",borderRadius:14,border:"none",background:alumnaLoading?"rgba(255,255,255,0.15)":T.sageMid,color:"white",fontSize:14,fontWeight:800,cursor:alumnaLoading?"not-allowed":"pointer",fontFamily:FB}}>
+                  {alumnaLoading?"Verificando…":"Verificar y continuar →"}
+                </button>
+              </div>
+            )}
           </div>
 
         </div>
