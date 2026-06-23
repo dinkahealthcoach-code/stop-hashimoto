@@ -28,7 +28,7 @@ async function getMembership(email){
   try{
     const r=await fetch("/api/verify-membership",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})});
     const data=await r.json();
-    const mem={type:data?.membership==="premium"?"premium":"free",email,checkedAt:Date.now()};
+    const mem={type:data?.membership==="premium"?"premium":"free",plan_type:data?.plan_type||"general",email,checkedAt:Date.now()};
     localStorage.setItem("membership:status",JSON.stringify(mem));
     return mem;
   }catch{
@@ -60,15 +60,19 @@ function PaywallScreen({onActivate}){
   async function handleAlumnaCheck(){
     if(!alumnaEmail.trim()||!alumnaEmail.includes("@")){setAlumnaErr("Ingresa un email válido.");return;}
     setAlumnaLoading(true);setAlumnaErr(null);
+    // Abrir ventana ANTES del await para evitar bloqueo de popup del navegador
+    const win=window.open("","_blank");
     try{
       const r=await fetch("/api/verify-alumna",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:alumnaEmail.toLowerCase().trim()})});
       const data=await r.json();
       if(data?.autorizada){
-        window.open(HOTMART_COMUNIDAD_URL,"_blank");
+        win.location.href=HOTMART_COMUNIDAD_URL;
       } else {
+        win.close();
         setAlumnaErr("No encontramos ese email entre nuestras alumnas. Si crees que es un error, escríbenos a dinkahealthcoach@gmail.com");
       }
     }catch{
+      win.close();
       setAlumnaErr("Error de conexión. Intenta de nuevo en unos segundos.");
     }
     setAlumnaLoading(false);
@@ -82,7 +86,7 @@ function PaywallScreen({onActivate}){
       const r=await fetch("/api/verify-membership",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:code.toLowerCase().trim()})});
       const data=await r.json();
       if(data?.membership==="premium"){
-        const mem={type:"premium",email:code.toLowerCase().trim(),activatedAt:Date.now()};
+        const mem={type:"premium",plan_type:data?.plan_type||"general",email:code.toLowerCase().trim(),activatedAt:Date.now()};
         await setMembership(mem);
         onActivate("premium");
       } else {
@@ -202,7 +206,7 @@ function PaywallScreen({onActivate}){
       {tab==="codigo"&&(
         <div style={{width:"100%",maxWidth:340}}>
           <div style={{borderRadius:20,background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.15)",padding:"24px",backdropFilter:"blur(10px)"}}>
-            <p style={{fontSize:14,fontWeight:700,color:"white",marginBottom:4}}>Activar acceso premium</p>
+            <p style={{fontSize:14,fontWeight:700,color:"white",marginBottom:4}}>Activar acceso</p>
             <p style={{fontSize:12,color:"rgba(255,255,255,0.5)",marginBottom:20,lineHeight:1.6}}>Ingresa el email con el que realizaste tu compra (alumnas o suscripción premium).</p>
             <input value={code} onChange={e=>setCode(e.target.value)} placeholder="tu@email.com" style={{width:"100%",padding:"14px 16px",borderRadius:14,border:"1px solid rgba(255,255,255,0.2)",background:"rgba(255,255,255,0.05)",color:"white",fontSize:14,fontFamily:FB,boxSizing:"border-box",outline:"none"}}/>
             {err&&<p style={{fontSize:12,color:T.terraLight,marginTop:8}}>{err}</p>}
@@ -1146,7 +1150,7 @@ function RecetaModal({receta,onClose}){
 }
 
 // ── RECETARIO ─────────────────────────────────────────────────────────────────
-function RecetarioSH({onBack,perfilFase,isPremium,onUpgrade}){
+function RecetarioSH({onBack,perfilFase,isPremium,planType,onUpgrade}){
   const fasesDisp=["Eliminación","Reintroducción","Mantenimiento"];
   const faseInicial=perfilFase&&fasesDisp.includes(perfilFase)?perfilFase:"Eliminación";
   const [fase,setFase]=useState(faseInicial);
@@ -1154,24 +1158,31 @@ function RecetarioSH({onBack,perfilFase,isPremium,onUpgrade}){
   const [q,setQ]=useState("");
   const [abierta,setAbierta]=useState(null);
   const rFase=FASES[fase];
+
+  // Categorías permitidas por plan
+  const CATS_GENERAL=["almuerzo","sopa"]; // Plan General/Premium: solo almuerzo y sopas
+  const LIMITE_GENERAL=14;
+  const LIMITE_COMUNIDAD=24;
+
   const todasFiltradas=RECETARIO.filter(r=>
     r.fases.includes(fase)&&
     (cat==="todos"||r.cat===cat)&&
     (q===""||r.titulo.toLowerCase().includes(q.toLowerCase())||r.ing.some(i=>i.toLowerCase().includes(q.toLowerCase())))
   );
-  // Free: solo 3 recetas de almuerzo. Premium: 2 por categoría
+
   let filtradas;
-  if(isPremium){
-    const porCat={};
-    filtradas=todasFiltradas.filter(r=>{
-      porCat[r.cat]=(porCat[r.cat]||0);
-      if(porCat[r.cat]>=PREMIUM_RECIPES_PER_CAT)return false;
-      porCat[r.cat]++;
-      return true;
-    });
-  } else {
+  if(!isPremium){
+    // Plan Gratuito: solo 3 recetas de almuerzo
     filtradas=RECETARIO.filter(r=>r.cat==="almuerzo"&&r.fases.includes(fase)).slice(0,FREE_RECIPES_LIMIT);
+  } else if(planType==="community"){
+    // Plan Comunidad: todas las categorías, máx 24
+    filtradas=todasFiltradas.slice(0,LIMITE_COMUNIDAD);
+  } else {
+    // Plan General/Premium: solo almuerzo y sopa, máx 14
+    filtradas=todasFiltradas.filter(r=>CATS_GENERAL.includes(r.cat)).slice(0,LIMITE_GENERAL);
   }
+
+  const planLabel=!isPremium?"plan gratuito: 3 almuerzos":planType==="community"?`plan comunidad: hasta ${LIMITE_COMUNIDAD} recetas`:`plan premium: almuerzos y sopas hasta ${LIMITE_GENERAL}`;
   return(
     <div style={{padding:"20px 20px 96px",fontFamily:FB}}>
       <button onClick={onBack} style={{display:"flex",alignItems:"center",gap:6,background:"none",border:"none",cursor:"pointer",fontSize:13,color:T.stone,fontWeight:600,marginBottom:16,padding:0}}><ChevronLeft size={16}/> Volver</button>
@@ -1198,8 +1209,9 @@ function RecetarioSH({onBack,perfilFase,isPremium,onUpgrade}){
       <div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:10,marginBottom:16}}>
         {CATS_R.map(c=><button key={c.id} onClick={()=>setCat(c.id)} style={{flexShrink:0,padding:"7px 14px",borderRadius:20,border:`1.5px solid ${cat===c.id?T.sage:T.stoneMid}`,background:cat===c.id?T.sage:"white",color:cat===c.id?"white":T.brown,fontSize:12,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",fontFamily:FB}}>{c.emoji} {c.label}</button>)}
       </div>
-      <p style={{fontSize:11,color:T.stone,marginBottom:12}}>{filtradas.length} receta{filtradas.length!==1?"s":""}{!isPremium?" · plan gratuito: 3 almuerzos":` · plan premium: ${PREMIUM_RECIPES_PER_CAT} por categoría`}</p>
+      <p style={{fontSize:11,color:T.stone,marginBottom:12}}>{filtradas.length} receta{filtradas.length!==1?"s":""} · {planLabel}</p>
       {!isPremium&&<div style={{marginBottom:12,padding:"10px 14px",borderRadius:14,background:T.terraPale,border:`1px solid ${T.terra}33`}}><p style={{fontSize:12,color:T.terra,lineHeight:1.5}}>🔒 Acceso gratuito: solo recetas de almuerzo. Suscríbete para ver todas las categorías.</p></div>}
+      {isPremium&&planType!=="community"&&<div style={{marginBottom:12,padding:"10px 14px",borderRadius:14,background:T.terraPale,border:`1px solid ${T.terra}33`}}><p style={{fontSize:12,color:T.terra,lineHeight:1.5}}>🔒 Plan Premium: acceso a recetas de almuerzo y sopas. Actualiza a Plan Comunidad para acceso completo.</p></div>}
       {filtradas.length===0?<div style={{textAlign:"center",padding:"40px 16px",color:T.stone,fontSize:13}}>No encontré recetas con ese término 🌿</div>
        :filtradas.map(r=>(
         <button key={r.id} onClick={()=>setAbierta(r)} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 16px",borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,marginBottom:10,cursor:"pointer",textAlign:"left"}}>
@@ -1218,7 +1230,8 @@ function RecetarioSH({onBack,perfilFase,isPremium,onUpgrade}){
         </button>
        ))}
       {!isPremium&&<PremiumLock onUpgrade={onUpgrade}/>}
-      {isPremium&&<div style={{margin:"16px 0",padding:"14px",borderRadius:16,background:T.sagePale,border:`1px solid ${T.sageLight}`,textAlign:"center"}}><p style={{fontSize:12,color:T.sage}}>Plan Premium · {PREMIUM_RECIPES_PER_CAT} recetas por categoría 🌿</p></div>}
+      {isPremium&&planType==="community"&&<div style={{margin:"16px 0",padding:"14px",borderRadius:16,background:T.sagePale,border:`1px solid ${T.sageLight}`,textAlign:"center"}}><p style={{fontSize:12,color:T.sage}}>Plan Comunidad · Acceso completo al recetario 🌿</p></div>}
+      {isPremium&&planType!=="community"&&<div style={{margin:"16px 0",padding:"14px",borderRadius:16,background:T.terraPale,border:`1px solid ${T.terra}`,textAlign:"center"}}><p style={{fontSize:12,color:T.terra}}>Plan Premium · Almuerzos y sopas incluidos 🌿</p></div>}
       {abierta&&<RecetaModal receta={abierta} onClose={()=>setAbierta(null)}/>}
     </div>
   );
@@ -1344,7 +1357,7 @@ function CreateByFase({profile,state,dispatch,onBack}){
 }
 
 // ── RECETAS TAB ───────────────────────────────────────────────────────────────
-function RecipesTab({state,dispatch,isPremium,onUpgrade}){
+function RecipesTab({state,dispatch,isPremium,planType,onUpgrade}){
   const {pantry,profile,recipesHistory}=state;
   const [modo,setModo]=useState("inicio");
   const [recipes,setRecipes]=useState([]);
@@ -1377,7 +1390,7 @@ function RecipesTab({state,dispatch,isPremium,onUpgrade}){
     await dbSet("history:recipes",[entry,...state.recipesHistory].slice(0,30));
   }
   if(modo==="fase")return isPremium?<CreateByFase profile={profile} state={state} dispatch={dispatch} onBack={()=>{setModo("inicio");setRecipes([]);}}/>:<div style={{padding:"56px 20px 96px"}}><button onClick={()=>setModo("inicio")} style={{display:"flex",alignItems:"center",gap:6,background:"none",border:"none",cursor:"pointer",fontSize:13,color:T.stone,fontWeight:600,marginBottom:20,padding:0,fontFamily:FB}}><ChevronLeft size={16}/> Volver</button><PremiumLock onUpgrade={onUpgrade}/></div>;
-  if(modo==="recetario")return<RecetarioSH onBack={()=>setModo("inicio")} perfilFase={profile?.fase_eri} isPremium={isPremium} onUpgrade={onUpgrade}/>;
+  if(modo==="recetario")return<RecetarioSH onBack={()=>setModo("inicio")} perfilFase={profile?.fase_eri} isPremium={isPremium} planType={planType} onUpgrade={onUpgrade}/>;
   return(
     <div style={{padding:"56px 20px 96px",fontFamily:FB}}>
       <h2 style={{fontFamily:FD,fontSize:26,color:T.brown,fontWeight:700,marginBottom:4}}>Recetas Método Eri</h2>
@@ -2340,6 +2353,7 @@ export default function StopHashimoto(){
   }
 
   const isPremium=membership?.type==="premium";
+  const planType=membership?.plan_type||"general"; // "general" | "community"
 
   if(!ready)return<div style={{minHeight:"100svh",background:`linear-gradient(160deg,${T.sagePale} 0%,${T.cream} 100%)`,display:"flex",alignItems:"center",justifyContent:"center"}}><Spin msg="Cargando Stop Hashimoto®…"/></div>;
 
@@ -2355,7 +2369,7 @@ export default function StopHashimoto(){
     <div style={{minHeight:"100svh",background:T.cream,maxWidth:480,margin:"0 auto",position:"relative"}}>
       {tab==="home"&&<HomeTab state={state} dispatch={dispatch} goTo={setTab} isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
       {tab==="pantry"&&<PantryTab state={state} dispatch={dispatch} isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
-      {tab==="recipes"&&<RecipesTab state={state} dispatch={dispatch} isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
+      {tab==="recipes"&&<RecipesTab state={state} dispatch={dispatch} isPremium={isPremium} planType={planType} onUpgrade={()=>setShowPaywall(true)}/>}
       {tab==="macros"&&<MacrosTab isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
       {tab==="sintomas"&&<SintomasTab isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
       {tab==="profile"&&<ProfileTab state={state} dispatch={dispatch} isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
