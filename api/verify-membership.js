@@ -11,7 +11,7 @@ export default async function handler(req, res) {
 
   try {
     const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/profiles?email=eq.${encodeURIComponent(email)}&select=email,membership`,
+      `${SUPABASE_URL}/rest/v1/profiles?email=eq.${encodeURIComponent(email)}&select=email,membership,plan_type`,
       {
         headers: {
           "apikey": SUPABASE_KEY,
@@ -24,10 +24,13 @@ export default async function handler(req, res) {
     const profile = data?.[0];
 
     if (!profile) {
-      return res.status(200).json({ membership: "free" });
+      return res.status(200).json({ membership: "free", plan_type: "general" });
     }
 
-    return res.status(200).json({ membership: profile.membership || "free" });
+    return res.status(200).json({
+      membership: profile.membership || "free",
+      plan_type: profile.plan_type || "general"
+    });
   } catch (err) {
     return res.status(500).json({ error: "Error verificando membresía" });
   }
