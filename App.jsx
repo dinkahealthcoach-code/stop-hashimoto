@@ -542,11 +542,11 @@ const CONSEJOS_ERI = [
   "Reduce el azúcar al mínimo. Alimenta las bacterias dañinas del intestino y activa cascadas inflamatorias.",
   "Practica la gratitud cada mañana. Modula el eje HPA (estrés-cortisol-tiroides) de forma directa.",
   "El magnesio por la noche mejora el sueño, relaja los músculos y apoya más de 300 reacciones enzimáticas.",
-  "Limita el café a 1 taza antes del mediodía. La cafeína en exceso eleva el cortisol y agota las suprarrenales.",
+  "El té de jengibre con limón en ayunas activa la digestión, reduce la inflamación y apoya la detoxificación hepática.",
   "Reintroduce alimentos de uno en uno. Espera 5 días entre cada uno para identificar reacciones sin confusión.",
   "La conexión social reduce la inflamación. El aislamiento crónico eleva las citoquinas proinflamatorias.",
   "Lava bien las frutas y verduras. Los pesticidas actúan como disruptores endocrinos y afectan la tiroides.",
-  "Cocina con cúrcuma y pimienta negra juntas. La piperina aumenta la absorción de curcumina hasta un 2.000%.",
+  "Cocina con cúrcuma y aceite de coco. La grasa aumenta la absorción de curcumina y potencia su efecto antiinflamatorio.",
   "Evita comer frente a pantallas. El sistema nervioso debe estar en modo 'descanso y digestión', no en alerta.",
   "El aceite de coco en ayunas nutre el intestino y aporta energía sin subir el azúcar en sangre.",
   "Cuida tus dientes — la salud bucal está directamente conectada con la inflamación sistémica.",
@@ -1431,7 +1431,7 @@ function RecipesTab({state,dispatch,isPremium,planType,onUpgrade}){
 }
 
 // ── PERFIL ────────────────────────────────────────────────────────────────────
-function ProfileTab({state,dispatch,isPremium,onUpgrade}){
+function ProfileTab({state,dispatch,isPremium,planType,onUpgrade}){
   const {profile}=state;
   const [confirm,setConfirm]=useState(false);
   const [photoURL,setPhotoURL]=useState(null);
@@ -1469,11 +1469,11 @@ function ProfileTab({state,dispatch,isPremium,onUpgrade}){
       </div>
 
       {/* MEMBRESÍA */}
-      <div style={{borderRadius:20,background:isPremium?`linear-gradient(135deg,${T.terra}22,${T.terraLight}22)`:`linear-gradient(135deg,${T.stonePale},${T.cream})`,border:`1.5px solid ${isPremium?T.terra:T.stoneMid}`,padding:"16px",marginBottom:16}}>
+      <div style={{borderRadius:20,background:isPremium?(planType==="community"?`linear-gradient(135deg,${T.sage}22,${T.sageLight}22)`:`linear-gradient(135deg,${T.terra}22,${T.terraLight}22)`):`linear-gradient(135deg,${T.stonePale},${T.cream})`,border:`1.5px solid ${isPremium?(planType==="community"?T.sage:T.terra):T.stoneMid}`,padding:"16px",marginBottom:16}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div>
-            <p style={{fontSize:11,fontWeight:700,color:isPremium?T.terra:T.stone,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:4}}>{isPremium?"✨ Plan Premium":"Plan Gratuito"}</p>
-            <p style={{fontSize:12,color:T.brownMid,lineHeight:1.5}}>{isPremium?"Acceso completo al Método Eri con IA":"Acceso limitado · Empieza a sanar hoy"}</p>
+            <p style={{fontSize:11,fontWeight:700,color:isPremium?(planType==="community"?T.sage:T.terra):T.stone,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:4}}>{isPremium?(planType==="community"?"🌿 Plan Comunidad":"✨ Plan Premium"):"Plan Gratuito"}</p>
+            <p style={{fontSize:12,color:T.brownMid,lineHeight:1.5}}>{isPremium?(planType==="community"?"Acceso completo · Recetario exclusivo de alumnas":"Acceso al Método Eri con IA"):"Acceso limitado · Empieza a sanar hoy"}</p>
           </div>
           {!isPremium&&<button onClick={onUpgrade} style={{padding:"9px 16px",borderRadius:12,border:"none",background:`linear-gradient(135deg,${T.terra},${T.terraLight})`,color:"white",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:FB,flexShrink:0,marginLeft:12}}>Upgrade →</button>}
         </div>
@@ -1508,10 +1508,7 @@ function ProfileTab({state,dispatch,isPremium,onUpgrade}){
       {/* DARSE DE BAJA */}
       <div style={{borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,padding:"16px",marginBottom:12}}>
         <p style={{fontSize:11,fontWeight:700,color:T.stone,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:4}}>Gestión de cuenta</p>
-        <p style={{fontSize:12,color:T.stone,lineHeight:1.6,marginBottom:12}}>¿Deseas cancelar tu suscripción? Escríbenos y lo gestionamos en menos de 24 horas.</p>
-        <button onClick={()=>window.open(`mailto:dinkahealthcoach@gmail.com?subject=Solicitud%20de%20cancelaci%C3%B3n%20-%20Stop%20Hashimoto&body=Hola%20Dinka%2C%0A%0ASolicito%20cancelar%20mi%20suscripci%C3%B3n%20al%20Proyecto%20Stop%20Hashimoto.%0A%0ANombre%3A%20${encodeURIComponent(profile?.nombre||"")}%0AEmail%3A%20%0A%0AGracias.`,"_blank")} style={{width:"100%",padding:"12px",borderRadius:14,border:`1px solid ${T.stoneMid}`,background:"transparent",color:T.brownMid,fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:FB}}>
-          ✉️ Solicitar cancelación por email
-        </button>
+        <p style={{fontSize:12,color:T.stone,lineHeight:1.6}}>¿Deseas cancelar tu suscripción? Puedes gestionarlo directamente desde tu cuenta en <b>Hotmart</b> en cualquier momento, sin necesidad de contactarnos.</p>
       </div>
 
       {confirm?<div style={{borderRadius:18,background:"#FDECEA",border:`1px solid ${T.error}33`,padding:"16px"}}>
@@ -1619,8 +1616,8 @@ const SUPLEMENTOS_DATA = [
     nombre:"Ashwagandha",emoji:"🌿",
     cuando:"Noche antes de dormir",
     dosis:"300–600 mg/día (extracto KSM-66)",
-    notas:"Adaptógeno que regula el cortisol y apoya la tiroides. Iniciar con dosis baja. Ciclos de 2–3 meses con descanso de 1 mes. Consultar si hay hipertiroidismo.",
-    interacciones:["Precaución con medicamentos para tiroides — puede potenciar su efecto","Evitar en embarazo"],
+    notas:"Adaptógeno que regula el cortisol y apoya la tiroides. Solo recomendado a partir de la fase de Reintroducción — no usar en Eliminación. Iniciar con dosis baja. Ciclos de 2–3 meses con descanso de 1 mes. Consultar si hay hipertiroidismo.",
+    interacciones:["Precaución con medicamentos para tiroides — puede potenciar su efecto","Evitar en embarazo","No usar en fase de Eliminación"],
     color:"#27AE60"
   },
 ];
@@ -2372,7 +2369,7 @@ export default function StopHashimoto(){
       {tab==="recipes"&&<RecipesTab state={state} dispatch={dispatch} isPremium={isPremium} planType={planType} onUpgrade={()=>setShowPaywall(true)}/>}
       {tab==="macros"&&<MacrosTab isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
       {tab==="sintomas"&&<SintomasTab isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
-      {tab==="profile"&&<ProfileTab state={state} dispatch={dispatch} isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
+      {tab==="profile"&&<ProfileTab state={state} dispatch={dispatch} isPremium={isPremium} planType={planType} onUpgrade={()=>setShowPaywall(true)}/>}
       <TabBar active={tab} setActive={setTab}/>
     </div>
   );
