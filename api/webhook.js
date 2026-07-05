@@ -16,7 +16,7 @@ async function supabase(method, table, body = null, match = null) {
       "Content-Type": "application/json",
       "apikey": SUPABASE_KEY,
       "Authorization": `Bearer ${SUPABASE_KEY}`,
-      "Prefer": method === "POST" ? "resolution=merge-duplicates" : "",
+      "Prefer": "resolution=merge-duplicates",
     },
     body: body ? JSON.stringify(body) : null,
   });
@@ -70,7 +70,7 @@ export default async function handler(req, res) {
       membership: "premium",
       plan_type,
       updated_at: new Date().toISOString(),
-    }, "email=eq." + email);
+    });
     console.log(`✅ Premium activado [${plan_type}]: ${email}`);
   }
 
@@ -80,7 +80,7 @@ export default async function handler(req, res) {
       membership: "free",
       plan_type: "general",
       updated_at: new Date().toISOString(),
-    }, "email=eq." + email);
+    });
     console.log(`❌ Premium cancelado: ${email}`);
   }
 
