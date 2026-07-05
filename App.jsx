@@ -456,6 +456,7 @@ const RECETARIO=[
    ing:["5-6 hígados de pollo en trozos pequeños","1 cebolla blanca en rodajas","3-4 dientes de ajo","Sal al gusto","2 cdas de vinagre balsámico","1 cda de aceite de coco","Opcional: tocino picado finamente"],
    pasos:["Calentar el aceite en sartén a fuego medio.","Agregar el ajo y la cebolla en rodajas. Sofreír ~10 minutos.","Hacer a un lado las cebollas y agregar el hígado de pollo.","Cocinar 2-3 minutos de cada lado.","Revolver con las cebollas, sazonar y finalizar con el vinagre balsámico."],nota:"El tocino picado muy fino ayuda a disfrazar el sabor del hígado. Muy recomendado."},
 ];
+const CATS_R=[
   {id:"todos",label:"Todos",emoji:"🌿"},{id:"desayuno",label:"Desayunos",emoji:"🌅"},
   {id:"almuerzo",label:"Almuerzos",emoji:"🍽️"},{id:"sopa",label:"Sopas",emoji:"🍲"},
   {id:"ensalada",label:"Ensaladas",emoji:"🥗"},{id:"colacion",label:"Colaciones",emoji:"🥥"},
