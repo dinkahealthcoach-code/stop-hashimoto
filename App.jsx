@@ -122,7 +122,7 @@ function PaywallScreen({onActivate}){
               <div><p style={{fontSize:14,fontWeight:700,color:T.ink,marginBottom:2}}>Plan Gratuito</p><p style={{fontSize:11,color:T.stone}}>Sin tarjeta requerida</p></div>
               <span style={{fontSize:20,fontWeight:800,color:T.stoneMid}}>$0</span>
             </div>
-            {["3 recetas del Método Eri para empezar","Agregar ingredientes a tu despensa","Guía completa de fases del Método Eri"].map(f=>(
+            {["Acceso a la guía de fases del Método Eri","Agrega ingredientes a tu despensa","Guía de suplementos y hábitos saludables"].map(f=>(
               <div key={f} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
                 <CheckCircle size={12} color={T.stoneMid}/>
                 <span style={{fontSize:12,color:T.stone}}>{f}</span>
@@ -148,7 +148,7 @@ function PaywallScreen({onActivate}){
                 <p style={{fontSize:10,color:"rgba(255,255,255,0.7)"}}>/mes después</p>
               </div>
             </div>
-            {["10 recetas del Método Eri por fase","IA identificadora de alimentos y etiquetas","Generador de recetas personalizadas con IA","Seguimiento de síntomas y energía","Plan semanal + contador de macros","Acceso ilimitado a toda la app"].map(f=>(
+            {["Generador de recetas personalizadas con IA","IA identificadora de alimentos y etiquetas","Seguimiento de síntomas y energía","Plan semanal + contador de macros","Acceso ilimitado a todas las funciones","Suplementos y hábitos del Método Eri"].map(f=>(
               <div key={f} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
                 <CheckCircle size={12} color="white"/>
                 <span style={{fontSize:12,color:"white"}}>{f}</span>
