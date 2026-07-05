@@ -99,36 +99,36 @@ function PaywallScreen({onActivate}){
   }
 
   return(
-    <div style={{minHeight:"100svh",background:`linear-gradient(160deg,${T.ink} 0%,${T.brown} 60%,${T.terra} 100%)`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"32px 24px",fontFamily:FB}}>
-      <div style={{width:64,height:64,borderRadius:20,background:"rgba(255,255,255,0.1)",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:16,backdropFilter:"blur(10px)"}}>
+    <div style={{minHeight:"100svh",background:`linear-gradient(160deg,#EBF3EC 0%,#FAF7F2 45%,#FDF0EA 100%)`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"32px 24px",fontFamily:FB}}>
+      <div style={{width:64,height:64,borderRadius:20,background:`linear-gradient(135deg,${T.sage},${T.sageMid})`,display:"flex",alignItems:"center",justifyContent:"center",marginBottom:16,boxShadow:`0 8px 24px ${T.sage}44`}}>
         <Leaf size={28} color="white"/>
       </div>
-      <p style={{fontSize:11,color:"rgba(255,255,255,0.5)",letterSpacing:"0.2em",textTransform:"uppercase",marginBottom:6}}>Proyecto Stop Hashimoto®</p>
-      <h1 style={{fontFamily:FD,fontSize:28,color:"white",fontWeight:700,textAlign:"center",marginBottom:6,lineHeight:1.2}}>Tu app para sanar{"\n"}desde la raíz</h1>
-      <p style={{fontSize:13,color:"rgba(255,255,255,0.6)",textAlign:"center",marginBottom:32,lineHeight:1.6}}>Nutrición · Estilo de vida · Método Eri</p>
+      <p style={{fontSize:11,color:T.sage,letterSpacing:"0.2em",textTransform:"uppercase",marginBottom:6,fontWeight:700}}>Proyecto Stop Hashimoto®</p>
+      <h1 style={{fontFamily:FD,fontSize:28,color:T.ink,fontWeight:700,textAlign:"center",marginBottom:6,lineHeight:1.2}}>Tu app para sanar{"\n"}desde la raíz</h1>
+      <p style={{fontSize:13,color:T.stone,textAlign:"center",marginBottom:32,lineHeight:1.6}}>Nutrición · Estilo de vida · Método Eri</p>
 
       {/* TABS */}
-      <div style={{display:"flex",background:"rgba(255,255,255,0.1)",borderRadius:16,padding:4,marginBottom:24,width:"100%",maxWidth:340}}>
+      <div style={{display:"flex",background:"rgba(0,0,0,0.06)",borderRadius:16,padding:4,marginBottom:24,width:"100%",maxWidth:340}}>
         {[["planes","Ver planes"],["codigo","Ya tengo acceso"]].map(([id,label])=>(
-          <button key={id} onClick={()=>setTab(id)} style={{flex:1,padding:"10px",borderRadius:12,border:"none",background:tab===id?"white":"transparent",color:tab===id?T.brown:"rgba(255,255,255,0.7)",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:FB,transition:"all .2s"}}>{label}</button>
+          <button key={id} onClick={()=>setTab(id)} style={{flex:1,padding:"10px",borderRadius:12,border:"none",background:tab===id?"white":"transparent",color:tab===id?T.brown:T.stone,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:FB,transition:"all .2s",boxShadow:tab===id?"0 2px 8px rgba(0,0,0,0.1)":"none"}}>{label}</button>
         ))}
       </div>
 
       {tab==="planes"&&(
         <div style={{width:"100%",maxWidth:340,display:"flex",flexDirection:"column",gap:12}}>
           {/* PLAN GRATUITO */}
-          <div style={{borderRadius:20,background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.15)",padding:"20px",backdropFilter:"blur(10px)"}}>
+          <div style={{borderRadius:20,background:"white",border:`1px solid ${T.stonePale}`,padding:"20px",boxShadow:"0 2px 12px rgba(0,0,0,0.06)"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
-              <div><p style={{fontSize:14,fontWeight:700,color:"white",marginBottom:2}}>Plan Gratuito</p><p style={{fontSize:11,color:"rgba(255,255,255,0.5)"}}>Sin tarjeta requerida</p></div>
-              <span style={{fontSize:20,fontWeight:800,color:"rgba(255,255,255,0.4)"}}>$0</span>
+              <div><p style={{fontSize:14,fontWeight:700,color:T.ink,marginBottom:2}}>Plan Gratuito</p><p style={{fontSize:11,color:T.stone}}>Sin tarjeta requerida</p></div>
+              <span style={{fontSize:20,fontWeight:800,color:T.stoneMid}}>$0</span>
             </div>
             {["3 recetas del Método Eri para empezar","Agregar ingredientes a tu despensa","Guía completa de fases del Método Eri"].map(f=>(
               <div key={f} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-                <CheckCircle size={12} color="rgba(255,255,255,0.3)"/>
-                <span style={{fontSize:12,color:"rgba(255,255,255,0.5)"}}>{f}</span>
+                <CheckCircle size={12} color={T.stoneMid}/>
+                <span style={{fontSize:12,color:T.stone}}>{f}</span>
               </div>
             ))}
-            <button onClick={()=>onActivate("free")} style={{width:"100%",marginTop:14,padding:"12px",borderRadius:14,border:"1px solid rgba(255,255,255,0.2)",background:"transparent",color:"rgba(255,255,255,0.6)",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:FB}}>
+            <button onClick={()=>onActivate("free")} style={{width:"100%",marginTop:14,padding:"12px",borderRadius:14,border:`1px solid ${T.stoneMid}`,background:"transparent",color:T.brownMid,fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:FB}}>
               Continuar gratis
             </button>
           </div>
@@ -165,7 +165,7 @@ function PaywallScreen({onActivate}){
               <div>
                 <span style={{fontSize:9,fontWeight:800,color:T.sageLight,letterSpacing:"0.15em",textTransform:"uppercase",background:"rgba(184,212,187,0.15)",padding:"3px 8px",borderRadius:8}}>SOLO ALUMNAS</span>
                 <p style={{fontSize:14,fontWeight:700,color:"white",marginTop:6,marginBottom:2}}>Plan Comunidad</p>
-                <p style={{fontSize:11,color:"rgba(255,255,255,0.6)"}}>Para egresadas del Proyecto Stop Hashimoto®</p>
+                <p style={{fontSize:11,color:"rgba(255,255,255,0.6)"}}>Para alumnas del Proyecto Stop Hashimoto®</p>
               </div>
               <div style={{textAlign:"right"}}>
                 <span style={{fontSize:10,fontWeight:800,color:T.sageLight,background:"rgba(184,212,187,0.15)",padding:"3px 9px",borderRadius:8,display:"inline-block",marginBottom:6}}>30 días gratis</span>
@@ -205,16 +205,16 @@ function PaywallScreen({onActivate}){
 
       {tab==="codigo"&&(
         <div style={{width:"100%",maxWidth:340}}>
-          <div style={{borderRadius:20,background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.15)",padding:"24px",backdropFilter:"blur(10px)"}}>
-            <p style={{fontSize:14,fontWeight:700,color:"white",marginBottom:4}}>Activar acceso</p>
-            <p style={{fontSize:12,color:"rgba(255,255,255,0.5)",marginBottom:20,lineHeight:1.6}}>Ingresa el email con el que realizaste tu compra.</p>
-            <input value={code} onChange={e=>setCode(e.target.value)} placeholder="tu@email.com" style={{width:"100%",padding:"14px 16px",borderRadius:14,border:"1px solid rgba(255,255,255,0.2)",background:"rgba(255,255,255,0.05)",color:"white",fontSize:14,fontFamily:FB,boxSizing:"border-box",outline:"none"}}/>
-            {err&&<p style={{fontSize:12,color:T.terraLight,marginTop:8}}>{err}</p>}
-            <button onClick={handleCode} disabled={loading} style={{width:"100%",marginTop:14,padding:"14px",borderRadius:14,border:"none",background:loading?"rgba(255,255,255,0.1)":`linear-gradient(135deg,${T.terra},${T.terraLight})`,color:"white",fontSize:14,fontWeight:700,cursor:loading?"not-allowed":"pointer",fontFamily:FB}}>
+          <div style={{borderRadius:20,background:"white",border:`1px solid ${T.stonePale}`,padding:"24px",boxShadow:"0 2px 12px rgba(0,0,0,0.06)"}}>
+            <p style={{fontSize:14,fontWeight:700,color:T.ink,marginBottom:4}}>Activar acceso</p>
+            <p style={{fontSize:12,color:T.stone,marginBottom:20,lineHeight:1.6}}>Ingresa el email con el que realizaste tu compra.</p>
+            <input value={code} onChange={e=>setCode(e.target.value)} placeholder="tu@email.com" style={{width:"100%",padding:"14px 16px",borderRadius:14,border:`1.5px solid ${T.stoneMid}`,background:T.cream,color:T.ink,fontSize:14,fontFamily:FB,boxSizing:"border-box",outline:"none"}}/>
+            {err&&<p style={{fontSize:12,color:T.terra,marginTop:8}}>{err}</p>}
+            <button onClick={handleCode} disabled={loading} style={{width:"100%",marginTop:14,padding:"14px",borderRadius:14,border:"none",background:loading?T.stonePale:`linear-gradient(135deg,${T.terra},${T.terraLight})`,color:loading?T.stone:"white",fontSize:14,fontWeight:700,cursor:loading?"not-allowed":"pointer",fontFamily:FB}}>
               {loading?"Verificando…":"Activar acceso →"}
             </button>
           </div>
-          <p style={{fontSize:11,color:"rgba(255,255,255,0.3)",textAlign:"center",marginTop:16,lineHeight:1.6}}>¿Problemas? Escríbenos a dinkahealthcoach@gmail.com</p>
+          <p style={{fontSize:11,color:T.stone,textAlign:"center",marginTop:16,lineHeight:1.6}}>¿Problemas? Escríbenos a dinkahealthcoach@gmail.com</p>
         </div>
       )}
     </div>
