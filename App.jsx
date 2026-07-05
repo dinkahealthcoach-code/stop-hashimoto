@@ -173,7 +173,7 @@ function PaywallScreen({onActivate}){
                 <p style={{fontSize:10,color:"rgba(255,255,255,0.7)"}}>/mes después</p>
               </div>
             </div>
-            {["Acceso completo al Método Eri","Recetas, despensa y seguimiento","Mismas funciones que Plan Premium","Precio exclusivo de por vida"].map(f=>(
+            {["Acceso completo al Método Eri","Recetas, despensa y seguimiento","Acceso completo a todas las funciones","Precio exclusivo de por vida"].map(f=>(
               <div key={f} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
                 <CheckCircle size={12} color={T.sageLight}/>
                 <span style={{fontSize:12,color:"rgba(255,255,255,0.85)"}}>{f}</span>
@@ -207,7 +207,7 @@ function PaywallScreen({onActivate}){
         <div style={{width:"100%",maxWidth:340}}>
           <div style={{borderRadius:20,background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.15)",padding:"24px",backdropFilter:"blur(10px)"}}>
             <p style={{fontSize:14,fontWeight:700,color:"white",marginBottom:4}}>Activar acceso</p>
-            <p style={{fontSize:12,color:"rgba(255,255,255,0.5)",marginBottom:20,lineHeight:1.6}}>Ingresa el email con el que realizaste tu compra (alumnas o suscripción premium).</p>
+            <p style={{fontSize:12,color:"rgba(255,255,255,0.5)",marginBottom:20,lineHeight:1.6}}>Ingresa el email con el que realizaste tu compra.</p>
             <input value={code} onChange={e=>setCode(e.target.value)} placeholder="tu@email.com" style={{width:"100%",padding:"14px 16px",borderRadius:14,border:"1px solid rgba(255,255,255,0.2)",background:"rgba(255,255,255,0.05)",color:"white",fontSize:14,fontFamily:FB,boxSizing:"border-box",outline:"none"}}/>
             {err&&<p style={{fontSize:12,color:T.terraLight,marginTop:8}}>{err}</p>}
             <button onClick={handleCode} disabled={loading} style={{width:"100%",marginTop:14,padding:"14px",borderRadius:14,border:"none",background:loading?"rgba(255,255,255,0.1)":`linear-gradient(135deg,${T.terra},${T.terraLight})`,color:"white",fontSize:14,fontWeight:700,cursor:loading?"not-allowed":"pointer",fontFamily:FB}}>
@@ -226,7 +226,7 @@ function PremiumLock({onUpgrade}){
   return(
     <div style={{margin:"16px 0",borderRadius:20,background:`linear-gradient(135deg,${T.terra}22,${T.terraLight}22)`,border:`1.5px solid ${T.terra}44`,padding:"20px",textAlign:"center"}}>
       <p style={{fontSize:24,marginBottom:8}}>🔒</p>
-      <p style={{fontFamily:FD,fontSize:16,fontWeight:700,color:T.brown,marginBottom:4}}>Función Premium</p>
+      <p style={{fontFamily:FD,fontSize:16,fontWeight:700,color:T.brown,marginBottom:4}}>Función exclusiva</p>
       <p style={{fontSize:12,color:T.stone,lineHeight:1.6,marginBottom:14}}>Desbloquea el acceso completo al Método Eri con IA por $12.90/mes</p>
       <button onClick={onUpgrade} style={{padding:"12px 24px",borderRadius:14,border:"none",background:`linear-gradient(135deg,${T.terra},${T.terraLight})`,color:"white",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:FB,boxShadow:`0 4px 16px ${T.terra}44`}}>
         Ver planes →
@@ -409,8 +409,53 @@ const RECETARIO=[
    ing:["2 cdas semillas de chía","1 vaso de leche de almendras o de coco sin azúcar","Cacao en polvo sin azúcar (opcional)","Gotas de stevia (opcional)"],
    pasos:["Mezclar bien la chía con la leche elegida. Revolver para que no se agrupe.","Llevar al refrigerador toda la noche (mínimo 6 horas).","Al servir, agregar los toppings: berries, coconola, nibs de cacao."],
    nota:"💡 Cuanto más reposa, más cremoso queda. Ideal preparar varios frascos para la semana."},
+  // ── PLAN COMUNIDAD — Recetario Eliminación Semanas 3 y 4 ─────────────────
+  {id:25,cat:"desayuno",fases:["Eliminación","Reintroducción","Mantenimiento"],comunidad:true,titulo:"Smoothie de Fresa",mins:5,dif:"fácil",desc:"Energizante y antiinflamatorio. Perfecto para empezar el día en fase de Eliminación.",
+   ing:["1 taza de fresas congeladas o frescas","½ plátano congelado","2 cdas de colágeno hidrolizado","⅓ taza de leche de coco full fat (lata, sin endulzar)","⅓ taza de agua","1 puñado de espinacas o mix de lechugas"],
+   pasos:["Poner todos los ingredientes en la licuadora.","Licuar hasta obtener consistencia cremosa.","Servir frío. Opción caliente: calentar y servir como bowl tibio con coco deshidratado y fruta picada."],nota:"Puedes añadir una cucharada de aceite de coco para mayor saciedad."},
+  {id:26,cat:"desayuno",fases:["Eliminación","Reintroducción","Mantenimiento"],comunidad:true,titulo:"Green Smoothie",mins:5,dif:"fácil",desc:"Detox y alcalinizante. Cargado de clorofila y grasas saludables.",
+   ing:["2 puñados grandes de espinacas o lechugas","1 taza de agua","½ aguacate","½ pepino sin semillas ni cáscara","½ taza de manzana verde","Jugo de 1 limón","1 cda de aceite de oliva extra virgen","1 cda de vinagre de manzana"],
+   pasos:["Poner todos los ingredientes en la licuadora.","Licuar hasta obtener consistencia suave.","Servir de inmediato."],nota:"El vinagre de manzana potencia la digestión y el aceite de oliva mejora la absorción de nutrientes."},
+  {id:27,cat:"desayuno",fases:["Eliminación","Reintroducción","Mantenimiento"],comunidad:true,titulo:"Pancakes de Camote y Plátano",mins:25,dif:"fácil",desc:"Sin gluten ni huevo. El camote da textura suave y nutritiva.",
+   ing:["1 camote mediano cocido sin cáscara","1 plátano maduro machacado","2 cdas de harina de coco","1 cdita de bicarbonato de sodio","¼ taza leche de coco full fat","1 cda de aceite de coco","1 cdita de canela molida","Chorrito de extracto de vainilla","Miel de abeja o maple para servir"],
+   pasos:["Licuar todos los ingredientes hasta integrar.","Calentar sartén con aceite de coco a fuego bajo.","Vaciar la mezcla en porciones y cocinar hasta que se formen burbujas.","Voltear y cocinar 1-2 minutos más del otro lado.","Servir con miel."],nota:"Tardan más que los pancakes de trigo. Mantén el fuego bajo para que se cocinen bien por dentro."},
+  {id:28,cat:"desayuno",fases:["Eliminación","Reintroducción","Mantenimiento"],comunidad:true,titulo:"Roiboos Latte",mins:15,dif:"fácil",desc:"Reconfortante y libre de cafeína. Ideal para reemplazar el café en Eliminación.",
+   ing:["2 cdas de té roiboos","¼ taza de agua","¾ taza de leche de coco","1 pizca de canela en polvo","Miel de maple o abeja para endulzar","1 cda de gelatina/grenetina"],
+   pasos:["En una ollita hervir 1 taza de agua con las hojas de roiboos. Apagar el fuego y dejar reposar 5-6 minutos.","Calentar la leche de coco y disolver la grenetina removiendo bien.","Colar el té y ponerlo junto con la leche de coco en la licuadora.","Licuar 2-3 minutos y servir."],nota:"⚠️ Tapar bien la licuadora con líquidos calientes."},
+  {id:29,cat:"desayuno",fases:["Eliminación","Reintroducción","Mantenimiento"],comunidad:true,titulo:"Yogurt de Coco",mins:10,dif:"fácil",desc:"Probiótico natural sin lácteos. Repara la microbiota intestinal.",
+   ing:["1 lata de leche de coco full fat","2 cápsulas de probióticos sin prebióticos"],
+   pasos:["En un bowl mezclar la leche de coco con el contenido de las cápsulas probióticas.","Revolver muy bien.","Colocar en recipiente de vidrio y tapar con una servilleta ajustada con liga.","Dejar a temperatura ambiente 24-48 horas.","Refrigerar 4-6 horas antes de consumir.","Acompañar con frutas y miel."],nota:"24 horas de fermentación suele ser lo ideal. Más tiempo = más ácido."},
+  {id:30,cat:"desayuno",fases:["Eliminación","Reintroducción","Mantenimiento"],comunidad:true,titulo:"Avena de Coliflor",mins:25,dif:"fácil",desc:"Sin granos. La coliflor imita la textura de la avena perfectamente.",
+   ing:["1 coliflor mediana en floretes","Fruta picada (fresas, blueberries, manzana)","2 cdas de miel de abeja o maple","⅓ taza de leche de coco full fat","1 rajita de canela o 1 cdita de canela molida"],
+   pasos:["Poner la coliflor y la fruta con la canela en una olla y cubrir apenas con agua.","Tapar y cocinar 20 minutos.","Retirar la canela, escurrir y moler con batidora de inmersión dejando grumos.","Regresar a la olla, agregar la leche de coco y la miel. Mezclar y servir caliente."],nota:"La coliflor no tiene sabor propio. La fruta y la miel son los protagonistas."},
+  {id:31,cat:"sopa",fases:["Eliminación","Reintroducción","Mantenimiento"],comunidad:true,titulo:"Crema de Apio",mins:35,dif:"fácil",desc:"Depurativa y antiinflamatoria. La coliflor da textura cremosa sin lácteos.",
+   ing:["1 cda de aceite de coco","½ cebolla picada","3 dientes de ajo picados","1 hoja de laurel seca","1 cabeza de apio en trozos","1 taza de coliflor picada","1 litro de caldo de pollo o caldo de huesos","Sal al gusto"],
+   pasos:["Freír la cebolla y el ajo en aceite hasta que estén blandos.","Agregar el apio y la coliflor. Cocinar 15 minutos.","Licuar todo con el laurel y el caldo hasta hacer puré.","Verter en olla, sazonar con sal y servir."],nota:"Puedes usar leche de coco en lata para una versión más cremosa y saciante."},
+  {id:32,cat:"almuerzo",fases:["Eliminación","Reintroducción","Mantenimiento"],comunidad:true,titulo:"Hamburguesas de Carne con Calabaza",mins:25,dif:"fácil",desc:"Jugosas y sin relleno inflamatorio. La calabaza añade humedad y nutrientes.",
+   ing:["1 calabacita rayada","½ kg de carne molida de res","1 cdita de sal de mar","¼ cdita de coco aminos","1 ajo machacado","Cebollita cambray picada","Opcional: tocino y lechuga para envolver"],
+   pasos:["Mezclar todos los ingredientes en un bowl.","Formar hamburguesas y poner sal encima.","Cocinar en sartén con aceite de aguacate o coco.","Servir con aguacate."],nota:"Acompañar con camote en bastones horneados con aceite de coco y sal."},
+  {id:33,cat:"almuerzo",fases:["Eliminación","Reintroducción","Mantenimiento"],comunidad:true,titulo:"Hamburguesas de Salmón y Camote",mins:20,dif:"fácil",desc:"Ricas en omega-3. Antiinflamatorias y muy saciantes.",
+   ing:["1 taza de camote cocido sin cáscara","½ taza de coliflor cocida","1-2 latas de salmón salvaje","10-12 aceitunas picadas","1 cda de aceite de coco o aguacate"],
+   pasos:["Mezclar todos los ingredientes en un bowl con tenedor hasta integrar.","Dividir en 4 partes y formar hamburguesas.","Cocinar en sartén con aceite hasta dorar de ambos lados.","Servir con aguacate."],nota:"El salmón salvaje (wild salmon) es superior al de cultivo en omega-3."},
+  {id:34,cat:"almuerzo",fases:["Eliminación","Reintroducción","Mantenimiento"],comunidad:true,titulo:"Estofado de Cola de Res",mins:105,dif:"media",desc:"Reconfortante y rico en colágeno. Perfecto para reparar el intestino.",
+   ing:["1 kg de cola de res en trozos","1 cebolla grande picada","6 dientes de ajo picados","¼ taza de aceite de oliva","2 cdas de vinagre de manzana","Sal marina al gusto","1 cda de romero fresco","1 cda de tomillo fresco","2 tazas de caldo de res o agua","2 zanahorias en rodajas","1 camote en cubos","1 rama de apio en trozos"],
+   pasos:["Hacer sofrito de ajo y cebolla con aceite de oliva.","Agregar la cola de res y dorar de ambos lados.","Añadir el vinagre y cocinar en olla de presión 1 hora.","Agregar las verduras, romero, tomillo y caldo.","Cocinar a fuego medio sin tapa 45 minutos hasta que las verduras estén blandas."],nota:"Para caldo más espeso añadir harina de yuca o arrowroot al final."},
+  {id:35,cat:"almuerzo",fases:["Eliminación","Reintroducción","Mantenimiento"],comunidad:true,titulo:"Caldo de Res",mins:90,dif:"fácil",desc:"Nutritivo y reconfortante. Puede ser desayuno, almuerzo o cena.",
+   ing:["1 kg chamberete o falda de res","3½ litros de agua","2 dientes de ajo","1 trozo de cebolla","2 ramas de cilantro","2 zanahorias en rodajas","1 calabacita en rodajas","1 chayote en cubos","¼ col o repollo","Sal, limón y aguacate para servir"],
+   pasos:["Colocar carne, ajo y cebolla en olla con el agua. Llevar a ebullición y retirar espuma.","Bajar a fuego medio-bajo y cocinar 60 minutos.","Agregar sal y cocinar 40 minutos más.","Retirar cebolla y ajo. Agregar zanahoria, col, chayote y cilantro. Cocinar 20-25 minutos.","Agregar la calabacita y cocinar 10 minutos más. Servir con limón y aguacate."],nota:"En olla de presión: carne 35 min, verduras duras 5 min, blandas 1 min más."},
+  {id:36,cat:"almuerzo",fases:["Eliminación","Reintroducción","Mantenimiento"],comunidad:true,titulo:"Hash de Repollo con Tocino",mins:20,dif:"fácil",desc:"Versátil y rápido. Excelente guarnición para cualquier proteína.",
+   ing:["½ cabeza de repollo en tiras","¼ cebolla blanca picada","3-4 tiras de tocino sin nitritos","1 diente de ajo","1 pulgada de jengibre fresco","Sal al gusto"],
+   pasos:["Dorar el tocino en trozos en el sartén hasta que suelte su grasa.","Agregar el ajo, cebolla y jengibre picados.","Agregar el repollo en tiras y saltear.","Sazonar con sal al gusto."],nota:"Omitir el huevo como proteína en Eliminación. Es válido desayunar pollo, pescado o carne roja."},
+  {id:37,cat:"almuerzo",fases:["Eliminación","Reintroducción","Mantenimiento"],comunidad:true,titulo:"Hash de Jícama",mins:20,dif:"fácil",desc:"Crujiente y nutritivo. La jícama es prebiótica y excelente para la microbiota.",
+   ing:["1 cda de aceite de oliva o coco","1 cebolla blanca picada","4 tiras de tocino sin nitritos en cuadritos","4 dientes de ajo picados","2 tazas de jícama en cubos o rayada","2 tazas de kale o espinacas","½ cda de sal de mar"],
+   pasos:["Calentar el aceite y freír la cebolla 5 minutos.","Agregar el tocino y el ajo. Cocinar 2-3 minutos.","Agregar la jícama y el kale o espinacas.","Saltear hasta que estén tiernos. Sazonar."],nota:"Sin jícama puedes usar repollo verde o morado con excelentes resultados."},
+  {id:38,cat:"almuerzo",fases:["Eliminación","Reintroducción","Mantenimiento"],comunidad:true,titulo:"Coles de Bruselas con Tocino",mins:35,dif:"fácil",desc:"El tocino transforma las coles. Rico en fibra y antioxidantes.",
+   ing:["50g de tocino sin nitritos","1 cebolla pequeña picada","500g de coles de Bruselas a la mitad","1 ramita de tomillo fresco","¼ vasito de caldo de pollo","Sal al gusto","1-2 cdas de miel de maple"],
+   pasos:["Precalentar el horno a 220°C.","Dorar el tocino en sartén apta para horno ~8 min.","Añadir cebolla y sofreír 2 minutos.","Subir el fuego, añadir coles, tomillo y caldo. Sazonar.","Meter al horno 25 minutos, removiendo a media cocción."],nota:"Sin horno: blanquear las coles 5 min en agua hirviendo y saltear con el resto."},
+  {id:39,cat:"almuerzo",fases:["Eliminación","Reintroducción","Mantenimiento"],comunidad:true,titulo:"Hígado Encebollado",mins:25,dif:"fácil",desc:"El superalimento más subestimado. Densidad nutricional extraordinaria.",
+   ing:["5-6 hígados de pollo en trozos pequeños","1 cebolla blanca en rodajas","3-4 dientes de ajo","Sal al gusto","2 cdas de vinagre balsámico","1 cda de aceite de coco","Opcional: tocino picado finamente"],
+   pasos:["Calentar el aceite en sartén a fuego medio.","Agregar el ajo y la cebolla en rodajas. Sofreír ~10 minutos.","Hacer a un lado las cebollas y agregar el hígado de pollo.","Cocinar 2-3 minutos de cada lado.","Revolver con las cebollas, sazonar y finalizar con el vinagre balsámico."],nota:"El tocino picado muy fino ayuda a disfrazar el sabor del hígado. Muy recomendado."},
 ];
-const CATS_R=[
   {id:"todos",label:"Todos",emoji:"🌿"},{id:"desayuno",label:"Desayunos",emoji:"🌅"},
   {id:"almuerzo",label:"Almuerzos",emoji:"🍽️"},{id:"sopa",label:"Sopas",emoji:"🍲"},
   {id:"ensalada",label:"Ensaladas",emoji:"🥗"},{id:"colacion",label:"Colaciones",emoji:"🥥"},
@@ -1162,12 +1207,13 @@ function RecetarioSH({onBack,perfilFase,isPremium,planType,onUpgrade}){
   // Categorías permitidas por plan
   const CATS_GENERAL=["almuerzo","sopa"]; // Plan General/Premium: solo almuerzo y sopas
   const LIMITE_GENERAL=14;
-  const LIMITE_COMUNIDAD=24;
+  const LIMITE_COMUNIDAD=39;
 
   const todasFiltradas=RECETARIO.filter(r=>
     r.fases.includes(fase)&&
     (cat==="todos"||r.cat===cat)&&
-    (q===""||r.titulo.toLowerCase().includes(q.toLowerCase())||r.ing.some(i=>i.toLowerCase().includes(q.toLowerCase())))
+    (q===""||r.titulo.toLowerCase().includes(q.toLowerCase())||r.ing.some(i=>i.toLowerCase().includes(q.toLowerCase())))&&
+    (planType==="community"||!r.comunidad) // recetas comunidad:true solo para Plan Comunidad
   );
 
   let filtradas;
@@ -1182,7 +1228,7 @@ function RecetarioSH({onBack,perfilFase,isPremium,planType,onUpgrade}){
     filtradas=todasFiltradas.filter(r=>CATS_GENERAL.includes(r.cat)).slice(0,LIMITE_GENERAL);
   }
 
-  const planLabel=!isPremium?"plan gratuito: 3 almuerzos":planType==="community"?`plan comunidad: hasta ${LIMITE_COMUNIDAD} recetas`:`plan premium: almuerzos y sopas hasta ${LIMITE_GENERAL}`;
+  const planLabel=!isPremium?"plan gratuito: 3 almuerzos":planType==="community"?`plan comunidad: hasta ${LIMITE_COMUNIDAD} recetas`:`plan general: almuerzos y sopas hasta ${LIMITE_GENERAL}`;
   return(
     <div style={{padding:"20px 20px 96px",fontFamily:FB}}>
       <button onClick={onBack} style={{display:"flex",alignItems:"center",gap:6,background:"none",border:"none",cursor:"pointer",fontSize:13,color:T.stone,fontWeight:600,marginBottom:16,padding:0}}><ChevronLeft size={16}/> Volver</button>
@@ -1211,7 +1257,7 @@ function RecetarioSH({onBack,perfilFase,isPremium,planType,onUpgrade}){
       </div>
       <p style={{fontSize:11,color:T.stone,marginBottom:12}}>{filtradas.length} receta{filtradas.length!==1?"s":""} · {planLabel}</p>
       {!isPremium&&<div style={{marginBottom:12,padding:"10px 14px",borderRadius:14,background:T.terraPale,border:`1px solid ${T.terra}33`}}><p style={{fontSize:12,color:T.terra,lineHeight:1.5}}>🔒 Acceso gratuito: solo recetas de almuerzo. Suscríbete para ver todas las categorías.</p></div>}
-      {isPremium&&planType!=="community"&&<div style={{marginBottom:12,padding:"10px 14px",borderRadius:14,background:T.terraPale,border:`1px solid ${T.terra}33`}}><p style={{fontSize:12,color:T.terra,lineHeight:1.5}}>🔒 Plan Premium: acceso a recetas de almuerzo y sopas. Actualiza a Plan Comunidad para acceso completo.</p></div>}
+      {isPremium&&planType!=="community"&&<div style={{marginBottom:12,padding:"10px 14px",borderRadius:14,background:T.terraPale,border:`1px solid ${T.terra}33`}}><p style={{fontSize:12,color:T.terra,lineHeight:1.5}}>🔒 Plan General: acceso a recetas de almuerzo y sopas. Actualiza a Plan Comunidad para acceso completo.</p></div>}
       {filtradas.length===0?<div style={{textAlign:"center",padding:"40px 16px",color:T.stone,fontSize:13}}>No encontré recetas con ese término 🌿</div>
        :filtradas.map(r=>(
         <button key={r.id} onClick={()=>setAbierta(r)} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 16px",borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,marginBottom:10,cursor:"pointer",textAlign:"left"}}>
@@ -1231,7 +1277,7 @@ function RecetarioSH({onBack,perfilFase,isPremium,planType,onUpgrade}){
        ))}
       {!isPremium&&<PremiumLock onUpgrade={onUpgrade}/>}
       {isPremium&&planType==="community"&&<div style={{margin:"16px 0",padding:"14px",borderRadius:16,background:T.sagePale,border:`1px solid ${T.sageLight}`,textAlign:"center"}}><p style={{fontSize:12,color:T.sage}}>Plan Comunidad · Acceso completo al recetario 🌿</p></div>}
-      {isPremium&&planType!=="community"&&<div style={{margin:"16px 0",padding:"14px",borderRadius:16,background:T.terraPale,border:`1px solid ${T.terra}`,textAlign:"center"}}><p style={{fontSize:12,color:T.terra}}>Plan Premium · Almuerzos y sopas incluidos 🌿</p></div>}
+      {isPremium&&planType!=="community"&&<div style={{margin:"16px 0",padding:"14px",borderRadius:16,background:T.terraPale,border:`1px solid ${T.terra}`,textAlign:"center"}}><p style={{fontSize:12,color:T.terra}}>Plan General · Almuerzos y sopas incluidos 🌿</p></div>}
       {abierta&&<RecetaModal receta={abierta} onClose={()=>setAbierta(null)}/>}
     </div>
   );
@@ -1472,7 +1518,7 @@ function ProfileTab({state,dispatch,isPremium,planType,onUpgrade}){
       <div style={{borderRadius:20,background:isPremium?(planType==="community"?`linear-gradient(135deg,${T.sage}22,${T.sageLight}22)`:`linear-gradient(135deg,${T.terra}22,${T.terraLight}22)`):`linear-gradient(135deg,${T.stonePale},${T.cream})`,border:`1.5px solid ${isPremium?(planType==="community"?T.sage:T.terra):T.stoneMid}`,padding:"16px",marginBottom:16}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div>
-            <p style={{fontSize:11,fontWeight:700,color:isPremium?(planType==="community"?T.sage:T.terra):T.stone,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:4}}>{isPremium?(planType==="community"?"🌿 Plan Comunidad":"✨ Plan Premium"):"Plan Gratuito"}</p>
+            <p style={{fontSize:11,fontWeight:700,color:isPremium?(planType==="community"?T.sage:T.terra):T.stone,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:4}}>{isPremium?(planType==="community"?"🌿 Plan Comunidad":"✨ Plan General"):"Plan Gratuito"}</p>
             <p style={{fontSize:12,color:T.brownMid,lineHeight:1.5}}>{isPremium?(planType==="community"?"Acceso completo · Recetario exclusivo de alumnas":"Acceso al Método Eri con IA"):"Acceso limitado · Empieza a sanar hoy"}</p>
           </div>
           {!isPremium&&<button onClick={onUpgrade} style={{padding:"9px 16px",borderRadius:12,border:"none",background:`linear-gradient(135deg,${T.terra},${T.terraLight})`,color:"white",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:FB,flexShrink:0,marginLeft:12}}>Upgrade →</button>}
