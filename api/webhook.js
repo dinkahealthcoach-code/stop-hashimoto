@@ -3,7 +3,6 @@ import crypto from "crypto";
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SECRET_KEY;
 
-// IDs de productos Hotmart
 const PLAN_COMUNIDAD_ID = "7960502";
 const PLAN_GENERAL_ID = "7960716";
 
@@ -33,7 +32,6 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  // Verificación de firma Hotmart
   const secret = process.env.HOTMART_WEBHOOK_SECRET;
   const signature = req.headers["x-hotmart-hottok"];
 
@@ -46,42 +44,4 @@ export default async function handler(req, res) {
   const email = event.data?.buyer?.email;
   const productId = event.data?.product?.id;
 
-  if (!email) return res.status(200).json({ received: true });
-
-  const plan_type = getPlanType(productId);
-
-  const activos = [
-    "PURCHASE_APPROVED",
-    "PURCHASE_COMPLETE",
-    "SUBSCRIPTION_REACTIVATED",
-  ];
-
-  const inactivos = [
-    "PURCHASE_CANCELED",
-    "PURCHASE_REFUNDED",
-    "SUBSCRIPTION_CANCELLATION",
-    "PURCHASE_EXPIRED",
-  ];
-
-  if (activos.includes(eventName)) {
-    await supabase("POST", "profiles", {
-      email,
-      membership: "premium",
-      plan_type,
-      updated_at: new Date().toISOString(),
-    });
-    console.log(`✅ Premium activado [${plan_type}]: ${email}`);
-  }
-
-  if (inactivos.includes(eventName)) {
-    await supabase("POST", "profiles", {
-      email,
-      membership: "free",
-      plan_type: "general",
-      updated_at: new Date().toISOString(),
-    });
-    console.log(`❌ Premium cancelado: ${email}`);
-  }
-
-  return res.status(200).json({ received: true });
-}
+  if (!email) return res.status(200).json({ received: true
