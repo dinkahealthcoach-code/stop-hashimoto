@@ -160,40 +160,41 @@ function PaywallScreen({onActivate}){
           </div>
 
           {/* PLAN COMUNIDAD — ALUMNAS */}
-          <div style={{borderRadius:20,background:"rgba(255,255,255,0.08)",border:`1.5px solid ${T.sageLight}55`,padding:"20px",backdropFilter:"blur(10px)"}}>
+          <div style={{borderRadius:20,background:`linear-gradient(135deg,${T.sage},${T.sageMid})`,padding:"20px",boxShadow:`0 12px 40px ${T.sage}66`,position:"relative",overflow:"hidden"}}>
+            <div style={{position:"absolute",top:-20,right:-20,width:80,height:80,borderRadius:"50%",background:"rgba(255,255,255,0.08)"}}/>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
               <div>
-                <span style={{fontSize:9,fontWeight:800,color:T.sageLight,letterSpacing:"0.15em",textTransform:"uppercase",background:"rgba(184,212,187,0.15)",padding:"3px 8px",borderRadius:8}}>SOLO ALUMNAS</span>
+                <span style={{fontSize:9,fontWeight:800,color:"white",letterSpacing:"0.15em",textTransform:"uppercase",background:"rgba(255,255,255,0.2)",padding:"3px 8px",borderRadius:8}}>SOLO ALUMNAS</span>
                 <p style={{fontSize:14,fontWeight:700,color:"white",marginTop:6,marginBottom:2}}>Plan Comunidad</p>
-                <p style={{fontSize:11,color:"rgba(255,255,255,0.6)"}}>Para alumnas del Proyecto Stop Hashimoto®</p>
+                <p style={{fontSize:11,color:"rgba(255,255,255,0.75)"}}>Para alumnas del Proyecto Stop Hashimoto®</p>
               </div>
               <div style={{textAlign:"right"}}>
-                <span style={{fontSize:10,fontWeight:800,color:T.sageLight,background:"rgba(184,212,187,0.15)",padding:"3px 9px",borderRadius:8,display:"inline-block",marginBottom:6}}>30 días gratis</span>
+                <span style={{fontSize:10,fontWeight:800,color:"white",background:"rgba(255,255,255,0.25)",padding:"3px 9px",borderRadius:8,display:"inline-block",marginBottom:6}}>30 días gratis</span>
                 <div><span style={{fontSize:22,fontWeight:800,color:"white"}}>$8.90</span></div>
                 <p style={{fontSize:10,color:"rgba(255,255,255,0.7)"}}>/mes después</p>
               </div>
             </div>
             {["Acceso completo al Método Eri","Recetas, despensa y seguimiento","Acceso completo a todas las funciones","Precio exclusivo de por vida"].map(f=>(
               <div key={f} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-                <CheckCircle size={12} color={T.sageLight}/>
-                <span style={{fontSize:12,color:"rgba(255,255,255,0.85)"}}>{f}</span>
+                <CheckCircle size={12} color="white"/>
+                <span style={{fontSize:12,color:"white"}}>{f}</span>
               </div>
             ))}
             {!showAlumnaCheck?(
               <>
-                <button onClick={()=>setShowAlumnaCheck(true)} style={{width:"100%",marginTop:14,padding:"14px",borderRadius:14,border:"none",background:T.sageMid,color:"white",fontSize:14,fontWeight:800,cursor:"pointer",fontFamily:FB,boxShadow:`0 4px 16px ${T.sage}44`}}>
+                <button onClick={()=>setShowAlumnaCheck(true)} style={{width:"100%",marginTop:14,padding:"14px",borderRadius:14,border:"none",background:"white",color:T.sage,fontSize:14,fontWeight:800,cursor:"pointer",fontFamily:FB,boxShadow:"0 4px 16px rgba(0,0,0,0.15)"}}>
                   Soy alumna, empezar →
                 </button>
-                <p style={{fontSize:11,color:"rgba(255,255,255,0.4)",textAlign:"center",marginTop:10,lineHeight:1.6}}>
+                <p style={{fontSize:11,color:"rgba(255,255,255,0.6)",textAlign:"center",marginTop:10,lineHeight:1.6}}>
                   Ya compraste el Proyecto Stop Hashimoto®. Verificaremos tu email antes de llevarte al pago.
                 </p>
               </>
             ):(
               <div style={{marginTop:14}}>
-                <p style={{fontSize:11,color:"rgba(255,255,255,0.6)",marginBottom:8,lineHeight:1.5}}>Ingresa el email con el que compraste el Proyecto Stop Hashimoto®:</p>
-                <input value={alumnaEmail} onChange={e=>setAlumnaEmail(e.target.value)} placeholder="tu@email.com" style={{width:"100%",padding:"12px 14px",borderRadius:12,border:"1px solid rgba(255,255,255,0.2)",background:"rgba(255,255,255,0.05)",color:"white",fontSize:13,fontFamily:FB,boxSizing:"border-box",outline:"none"}}/>
-                {alumnaErr&&<p style={{fontSize:11,color:T.terraLight,marginTop:8,lineHeight:1.5}}>{alumnaErr}</p>}
-                <button onClick={handleAlumnaCheck} disabled={alumnaLoading} style={{width:"100%",marginTop:10,padding:"14px",borderRadius:14,border:"none",background:alumnaLoading?"rgba(255,255,255,0.15)":T.sageMid,color:"white",fontSize:14,fontWeight:800,cursor:alumnaLoading?"not-allowed":"pointer",fontFamily:FB}}>
+                <p style={{fontSize:11,color:"rgba(255,255,255,0.85)",marginBottom:8,lineHeight:1.5}}>Ingresa el email con el que compraste el Proyecto Stop Hashimoto®:</p>
+                <input value={alumnaEmail} onChange={e=>setAlumnaEmail(e.target.value)} placeholder="tu@email.com" style={{width:"100%",padding:"12px 14px",borderRadius:12,border:"1px solid rgba(255,255,255,0.3)",background:"rgba(255,255,255,0.15)",color:"white",fontSize:13,fontFamily:FB,boxSizing:"border-box",outline:"none"}}/>
+                {alumnaErr&&<p style={{fontSize:11,color:"#FFE4E1",marginTop:8,lineHeight:1.5}}>{alumnaErr}</p>}
+                <button onClick={handleAlumnaCheck} disabled={alumnaLoading} style={{width:"100%",marginTop:10,padding:"14px",borderRadius:14,border:"none",background:alumnaLoading?"rgba(255,255,255,0.2)":"white",color:alumnaLoading?"rgba(255,255,255,0.6)":T.sage,fontSize:14,fontWeight:800,cursor:alumnaLoading?"not-allowed":"pointer",fontFamily:FB}}>
                   {alumnaLoading?"Verificando…":"Verificar y continuar →"}
                 </button>
               </div>
