@@ -2391,6 +2391,18 @@ export default function StopHashimoto(){
   async function onboard(p){dispatch({type:"SET_PROFILE",p});await dbSet("profile:user",p);}
 
   async function handleActivate(type){
+    // Leer el membership completo que ya guardó handleCode (con plan_type correcto)
+    try{
+      const saved=localStorage.getItem("membership:status");
+      const savedMem=saved?JSON.parse(saved):null;
+      // Si ya hay un membership guardado con el tipo correcto, usarlo
+      if(savedMem&&savedMem.type===type){
+        setMembershipState(savedMem);
+        setShowPaywall(false);
+        return;
+      }
+    }catch{}
+    // Fallback: crear membership básico
     const mem={type,activatedAt:Date.now()};
     await setMembership(mem);
     setMembershipState(mem);
