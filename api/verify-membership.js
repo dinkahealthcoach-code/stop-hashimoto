@@ -16,22 +16,31 @@ export default async function handler(req, res) {
         headers: {
           "apikey": SUPABASE_KEY,
           "Authorization": `Bearer ${SUPABASE_KEY}`,
+          "Accept": "application/json",
         },
       }
     );
 
-    const data = await response.json();
-    const profile = data?.[0];
+    const text = await response.text();
+    console.log("Supabase response:", text);
+    
+    let data;
+    try { data = JSON.parse(text); } catch { data = []; }
+    
+    const profile = Array.isArray(data) ? data[0] : null;
 
     if (!profile) {
+      console.log("No profile found for:", email);
       return res.status(200).json({ membership: "free", plan_type: "general" });
     }
 
+    console.log("Profile found:", profile);
     return res.status(200).json({
       membership: profile.membership || "free",
       plan_type: profile.plan_type || "general"
     });
   } catch (err) {
+    console.error("Error:", err);
     return res.status(500).json({ error: "Error verificando membresía" });
   }
 }
