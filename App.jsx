@@ -1220,17 +1220,17 @@ function RecetarioSH({onBack,perfilFase,isPremium,planType,onUpgrade}){
 
   let filtradas;
   if(!isPremium){
-    // Plan Gratuito: solo 3 recetas de almuerzo
-    filtradas=RECETARIO.filter(r=>r.cat==="almuerzo"&&r.fases.includes(fase)).slice(0,FREE_RECIPES_LIMIT);
+    // Plan Gratuito: sin recetas del Método Eri
+    filtradas=[];
   } else if(planType==="community"){
-    // Plan Comunidad: todas las categorías, máx 24
+    // Plan Comunidad: todas las recetas, máx 39
     filtradas=todasFiltradas.slice(0,LIMITE_COMUNIDAD);
   } else {
-    // Plan General/Premium: solo almuerzo y sopa, máx 14
-    filtradas=todasFiltradas.filter(r=>CATS_GENERAL.includes(r.cat)).slice(0,LIMITE_GENERAL);
+    // Plan General/Premium: sin recetas del Método Eri (solo IA)
+    filtradas=[];
   }
 
-  const planLabel=!isPremium?"plan gratuito: 3 almuerzos":planType==="community"?`plan comunidad: hasta ${LIMITE_COMUNIDAD} recetas`:`plan general: almuerzos y sopas hasta ${LIMITE_GENERAL}`;
+  const planLabel=!isPremium?"plan gratuito: sin recetas":planType==="community"?`plan comunidad: hasta ${LIMITE_COMUNIDAD} recetas`:`plan general: usa la IA para generar recetas`;
   return(
     <div style={{padding:"20px 20px 96px",fontFamily:FB}}>
       <button onClick={onBack} style={{display:"flex",alignItems:"center",gap:6,background:"none",border:"none",cursor:"pointer",fontSize:13,color:T.stone,fontWeight:600,marginBottom:16,padding:0}}><ChevronLeft size={16}/> Volver</button>
@@ -1258,8 +1258,8 @@ function RecetarioSH({onBack,perfilFase,isPremium,planType,onUpgrade}){
         {CATS_R.map(c=><button key={c.id} onClick={()=>setCat(c.id)} style={{flexShrink:0,padding:"7px 14px",borderRadius:20,border:`1.5px solid ${cat===c.id?T.sage:T.stoneMid}`,background:cat===c.id?T.sage:"white",color:cat===c.id?"white":T.brown,fontSize:12,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",fontFamily:FB}}>{c.emoji} {c.label}</button>)}
       </div>
       <p style={{fontSize:11,color:T.stone,marginBottom:12}}>{filtradas.length} receta{filtradas.length!==1?"s":""} · {planLabel}</p>
-      {!isPremium&&<div style={{marginBottom:12,padding:"10px 14px",borderRadius:14,background:T.terraPale,border:`1px solid ${T.terra}33`}}><p style={{fontSize:12,color:T.terra,lineHeight:1.5}}>🔒 Acceso gratuito: solo recetas de almuerzo. Suscríbete para ver todas las categorías.</p></div>}
-      {isPremium&&planType!=="community"&&<div style={{marginBottom:12,padding:"10px 14px",borderRadius:14,background:T.terraPale,border:`1px solid ${T.terra}33`}}><p style={{fontSize:12,color:T.terra,lineHeight:1.5}}>🔒 Plan General: acceso a recetas de almuerzo y sopas. Actualiza a Plan Comunidad para acceso completo.</p></div>}
+      {!isPremium&&<div style={{marginBottom:12,padding:"10px 14px",borderRadius:14,background:T.terraPale,border:`1px solid ${T.terra}33`}}><p style={{fontSize:12,color:T.terra,lineHeight:1.5}}>🔒 El recetario del Método Eri es exclusivo del Plan Comunidad. Suscríbete para acceder a las 39 recetas.</p></div>}
+      {isPremium&&planType!=="community"&&<div style={{marginBottom:12,padding:"10px 14px",borderRadius:14,background:T.terraPale,border:`1px solid ${T.terra}33`}}><p style={{fontSize:12,color:T.terra,lineHeight:1.5}}>🔒 El recetario del Método Eri es exclusivo del Plan Comunidad. Usa el generador de IA para crear tus propias recetas personalizadas.</p></div>}
       {filtradas.length===0?<div style={{textAlign:"center",padding:"40px 16px",color:T.stone,fontSize:13}}>No encontré recetas con ese término 🌿</div>
        :filtradas.map(r=>(
         <button key={r.id} onClick={()=>setAbierta(r)} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 16px",borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,marginBottom:10,cursor:"pointer",textAlign:"left"}}>
@@ -1279,7 +1279,7 @@ function RecetarioSH({onBack,perfilFase,isPremium,planType,onUpgrade}){
        ))}
       {!isPremium&&<PremiumLock onUpgrade={onUpgrade}/>}
       {isPremium&&planType==="community"&&<div style={{margin:"16px 0",padding:"14px",borderRadius:16,background:T.sagePale,border:`1px solid ${T.sageLight}`,textAlign:"center"}}><p style={{fontSize:12,color:T.sage}}>Plan Comunidad · Acceso completo al recetario 🌿</p></div>}
-      {isPremium&&planType!=="community"&&<div style={{margin:"16px 0",padding:"14px",borderRadius:16,background:T.terraPale,border:`1px solid ${T.terra}`,textAlign:"center"}}><p style={{fontSize:12,color:T.terra}}>Plan General · Almuerzos y sopas incluidos 🌿</p></div>}
+      {isPremium&&planType!=="community"&&<div style={{margin:"16px 0",padding:"14px",borderRadius:16,background:T.terraPale,border:`1px solid ${T.terra}`,textAlign:"center"}}><p style={{fontSize:12,color:T.terra}}>Usa el generador de IA ✨ para crear recetas personalizadas según tu fase y síntomas.</p></div>}
       {abierta&&<RecetaModal receta={abierta} onClose={()=>setAbierta(null)}/>}
     </div>
   );
