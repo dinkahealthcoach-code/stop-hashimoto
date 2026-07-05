@@ -7,9 +7,8 @@ const SUPABASE_KEY = process.env.SUPABASE_SECRET_KEY;
 const PLAN_COMUNIDAD_ID = "7960502";
 const PLAN_GENERAL_ID = "7960716";
 
-async function supabase(method, table, body = null, match = null) {
-  let url = `${SUPABASE_URL}/rest/v1/${table}`;
-  if (match) url += `?${match}`;
+async function supabase(method, table, body = null) {
+  const url = `${SUPABASE_URL}/rest/v1/${table}`;
   const res = await fetch(url, {
     method,
     headers: {
