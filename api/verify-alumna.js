@@ -18,15 +18,23 @@ export default async function handler(req, res) {
         headers: {
           "apikey": SUPABASE_KEY,
           "Authorization": `Bearer ${SUPABASE_KEY}`,
+          "Accept": "application/json",
         },
       }
     );
 
-    const data = await response.json();
+    const text = await response.text();
+    console.log("verify-alumna response:", text);
+    
+    let data;
+    try { data = JSON.parse(text); } catch { data = []; }
+    
     const isAlumna = Array.isArray(data) && data.length > 0;
+    console.log("Email:", cleanEmail, "-> autorizada:", isAlumna);
 
     return res.status(200).json({ autorizada: isAlumna });
   } catch (err) {
+    console.error("Error verify-alumna:", err);
     return res.status(500).json({ error: "Error verificando alumna" });
   }
 }
