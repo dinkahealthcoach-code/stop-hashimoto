@@ -2439,6 +2439,26 @@ export default function StopHashimoto(){
       if(savedMem&&savedMem.type===type){
         setMembershipState(savedMem);
         setShowPaywall(false);
+        // Recuperar despensa/perfil/recetas desde Supabase — necesario cuando el
+        // dispositivo perdió el cache local (ej: actualización de celular, reinstalo
+        // la app, cambió de navegador) y el usuario vuelve a entrar con "Ya tengo acceso".
+        if(savedMem.email){
+          setReady(false);
+          try{
+            const [dbProfile,dbPantry,dbRecipes]=await Promise.all([
+              getFromDB("profiles",savedMem.email),
+              getFromDB("pantry",savedMem.email),
+              getFromDB("recipes_history",savedMem.email),
+            ]);
+            dispatch({type:"LOAD",p:{
+              profile:dbProfile?.profile_data||state.profile||null,
+              pantry:dbPantry?.items||state.pantry||[],
+              recipesHistory:dbRecipes?.items||state.recipesHistory||[],
+              ticketsHistory:[]
+            }});
+          }catch(e){console.error("Error recuperando datos desde Supabase:",e);}
+          setReady(true);
+        }
         return;
       }
     }catch{}
