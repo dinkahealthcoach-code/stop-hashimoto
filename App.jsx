@@ -313,7 +313,7 @@ const CATS={
 // ── REGLAS POR FASE ───────────────────────────────────────────────────────────
 const FASES={
   "Eliminación":{color:T.terra,colorPale:T.terraPale,emoji:"🔴",
-    permitidos:["Carnes de res, cordero, pollo, pavo","Pescado y mariscos salvajes","Verduras de hoja verde (espinaca, kale, rúcula)","Tubérculos: camote, yuca, remolacha, nabo","Brócoli, coliflor, repollo, coles de Bruselas","Cebolla, ajo, zucchini, pepino, champiñones","Frutas: manzana, pera, arándanos, coco, palta/aguacate","Aceite de coco, aceite de oliva, aceite de aguacate","Leche y crema de coco","Hierbas frescas, vinagre de manzana, sal marina","Caldo de huesos casero"],
+    permitidos:["Carnes de res, cordero, pollo, pavo","Pescado y mariscos salvajes","Verduras de hoja verde (espinaca, kale, rúcula)","Tubérculos: camote, yuca, remolacha, nabo","Brócoli, coliflor, repollo, coles de Bruselas","Cebolla, ajo, zucchini, pepino, champiñones","Frutas: manzana, pera, arándanos, kiwi, coco, palta/aguacate","Aceite de coco, aceite de oliva, aceite de aguacate","Leche y crema de coco","Hierbas frescas, vinagre de manzana, sal marina","Caldo de huesos casero"],
     prohibidos:["Gluten y todos los granos (trigo, avena, arroz, quinoa, maíz)","Lácteos (leche, queso, yogur, mantequilla, ghee)","Huevos","Legumbres (lentejas, garbanzos, frijoles, soya, maní)","Solanáceas (tomate, pimiento, papa, berenjena, páprika)","Nueces y semillas","Azúcar, miel, endulzantes artificiales","Alcohol, café, té negro"],
     desc:"Fase más estricta. Elimina todos los alimentos inflamatorios para calmar el sistema inmune.",
   },
@@ -2108,6 +2108,7 @@ const ALIMENTOS_MACROS = [
   {nombre:"Pera (1 mediana)",kcal:101,prot:0.6,carbs:27,grasas:0.2,fibra:5.5,cat:"fruta"},
   {nombre:"Durazno/Melocotón (1 mediano)",kcal:58,prot:1.4,carbs:14,grasas:0.4,fibra:2.3,cat:"fruta"},
   {nombre:"Cerezas (100g)",kcal:63,prot:1.1,carbs:16,grasas:0.2,fibra:2.1,cat:"fruta"},
+  {nombre:"Kiwi (1 unidad mediana)",kcal:42,prot:0.8,carbs:10,grasas:0.4,fibra:2.1,cat:"fruta"},
   {nombre:"Coco rallado (30g)",kcal:99,prot:0.9,carbs:4.3,grasas:9.4,fibra:2.6,cat:"fruta"},
   {nombre:"Coco fresco (100g)",kcal:354,prot:3.3,carbs:15,grasas:33,fibra:9,cat:"fruta"},
   // ── GRASAS SALUDABLES ─────────────────────────────────────────────────────
