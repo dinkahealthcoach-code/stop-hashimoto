@@ -1,7 +1,7 @@
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SECRET_KEY;
 
-async function query(method, table, body = null, filter = null) {
+async function query(method, table, body = null, filter = null, extraHeaders = {}) {
   let url = `${SUPABASE_URL}/rest/v1/${table}`;
   if (filter) url += `?${filter}`;
   const res = await fetch(url, {
@@ -10,7 +10,8 @@ async function query(method, table, body = null, filter = null) {
       "Content-Type": "application/json",
       "apikey": SUPABASE_KEY,
       "Authorization": `Bearer ${SUPABASE_KEY}`,
-      "Prefer": "resolution=merge-duplicates,return=representation",
+      "Prefer": "return=representation",
+      ...extraHeaders,
     },
     body: body ? JSON.stringify(body) : null,
   });
@@ -18,16 +19,35 @@ async function query(method, table, body = null, filter = null) {
 }
 
 export default async function handler(req, res) {
-  const { table, email, data } = req.body || {};
+  const { table, email, data, action } = req.body || {};
   if (!email || !table) return res.status(400).json({ error: "Missing params" });
 
-  if (req.method === "GET" || req.query.action === "get") {
-    const result = await query("GET", table, null, `email=eq.${email}`);
+  // FIX 1: "action" viaja en el body (no en query string). Antes esta condición
+  // nunca era verdadera para las peticiones del frontend, así que un "get" caía
+  // en el bloque POST de abajo y terminaba insertando una fila vacía.
+  if (req.method === "GET" || action === "get") {
+    // Ordenamos por updated_at desc por seguridad, en caso de que queden filas
+    // duplicadas antiguas: siempre devolvemos la más reciente.
+    const result = await query(
+      "GET",
+      table,
+      null,
+      `email=eq.${email}&order=updated_at.desc&limit=1`
+    );
     return res.status(200).json(result?.[0] || null);
   }
 
   if (req.method === "POST") {
-    const result = await query("POST", table, { email, ...data, updated_at: new Date().toISOString() });
+    // FIX 2: agregamos on_conflict=email para que "merge-duplicates" sepa sobre
+    // qué columna hacer el upsert. Sin esto, Postgrest ignora el conflicto y
+    // simplemente inserta una fila nueva cada vez.
+    const result = await query(
+      "POST",
+      table,
+      { email, ...data, updated_at: new Date().toISOString() },
+      "on_conflict=email",
+      { "Prefer": "resolution=merge-duplicates,return=representation" }
+    );
     return res.status(200).json(result?.[0] || null);
   }
 
