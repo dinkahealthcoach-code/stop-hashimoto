@@ -318,12 +318,12 @@ const FASES={
     desc:"Fase más estricta. Elimina todos los alimentos inflamatorios para calmar el sistema inmune.",
   },
   "Reintroducción":{color:T.sage,colorPale:T.sagePale,emoji:"🟡",
-    permitidos:["Todo lo de Eliminación (base permanente)","Yemas de huevo (primero, separadas de la clara)","Legumbres bien remojadas y cocidas (de a una)","Frutos secos activados remojados 12h (de a uno)","Semillas activadas (de a una)","Ghee si se tolera","Arroz blanco si se tolera","Tomate maduro sin piel ni semillas si se tolera","Cacao puro ≥85% si se tolera"],
+    permitidos:["Todo lo de Eliminación (base permanente)","Yemas de huevo (primero, separadas de la clara)","Legumbres bien remojadas y cocidas (de a una)","Frutos secos activados remojados 12h (de a uno)","Semillas activadas (de a una)","Ghee si se tolera","Arroz blanco si se tolera","Tomate maduro sin piel ni semillas si se tolera","Cacao puro ≥85% si se tolera","Linaza y chía (semillas activadas, de a una)","Pudín de chía si se toleró","Harina de almendras y harina de linaza/lino si se toleraron","Pan, queque y galletas con harina de almendras o linaza si se toleraron","Queque keto si se toleró","Proteína en polvo y batidos de proteína si se toleraron","Barra de proteína si se toleró"],
     prohibidos:["Gluten (SIEMPRE prohibido)","Lácteos convencionales","Azúcar refinada y edulcorantes artificiales","Aceites de semillas refinados","Aditivos y conservantes","Alimentos que generaron síntomas en eliminación"],
     desc:"Reintroduces un alimento a la vez, con 5–7 días de observación entre cada uno.",
   },
   "Mantenimiento":{color:T.ok,colorPale:"#E8F5EE",emoji:"🟢",
-    permitidos:["Todo lo de Eliminación (base permanente)","Todos los alimentos reintroducidos y bien tolerados","Huevos si se toleraron","Legumbres preparadas si se toleraron","Frutos secos y semillas activados si se toleraron","Arroz, quinoa, mijo sin gluten si se toleraron","Chocolate negro ≥85% si se toleró","Café ocasional si se toleró","Lácteos fermentados (kéfir de cabra, yogur de coco)"],
+    permitidos:["Todo lo de Eliminación (base permanente)","Todos los alimentos reintroducidos y bien tolerados","Huevos si se toleraron","Legumbres preparadas si se toleraron","Frutos secos y semillas activados si se toleraron","Arroz, quinoa, mijo sin gluten si se toleraron","Chocolate negro ≥85% si se toleró","Café ocasional si se toleró","Lácteos fermentados (kéfir de cabra, yogur de coco)","Linaza y chía (pudín de chía)","Harina de almendras y harina de linaza/lino","Pan, queque y galletas con harina de almendras o linaza","Queque keto","Proteína en polvo, batidos de proteína y barras de proteína"],
     prohibidos:["Gluten (SIEMPRE prohibido en Hashimoto)","Lácteos convencionales de vaca","Azúcar refinada y ultraprocesados","Aceites de semillas refinados","Cualquier alimento que generó síntomas"],
     desc:"Alimentación antiinflamatoria de largo plazo. El gluten se excluye siempre.",
   },
@@ -517,7 +517,8 @@ const STEPS=[
     {key:"estres",label:"Nivel de estrés",type:"pills",opts:["Bajo","Moderado","Alto","Muy alto"]},
   ]},
   {id:"hashimoto",title:"Tu situación\nautoinmune",fields:[
-    {key:"tiempo_dx",label:"¿Cuánto llevas con Hashimoto?",type:"pills",opts:["Recién diagnosticada","Menos de 1 año","1–3 años","Más de 3 años"]},
+    {key:"condiciones",label:"¿Qué condición(es) autoinmune tienes?",type:"multi",opts:["Hashimoto","Vitiligo","Artritis reumatoide","Lupus","Psoriasis","Enfermedad celíaca","Enfermedad de Crohn","Colitis ulcerosa","Esclerosis múltiple","Síndrome de Sjögren","Diabetes tipo 1","Espondilitis anquilosante","Otra"]},
+    {key:"tiempo_dx",label:"¿Cuánto llevas con tu diagnóstico?",type:"pills",opts:["Recién diagnosticada","Menos de 1 año","1–3 años","Más de 3 años"]},
     {key:"fase_eri",label:"Fase Método Eri actual",type:"pills",opts:["Quiero empezar","Eliminación","Reintroducción","Mantenimiento"]},
     {key:"sintomas",label:"Síntomas principales (varios)",type:"multi",opts:["Fatiga crónica","Niebla mental","Caída de cabello","Hinchazón abdominal","Estreñimiento","Ansiedad","Problemas de sueño","Sensibilidad al frío","Piel seca"]},
   ]},
@@ -2166,6 +2167,20 @@ const ALIMENTOS_MACROS = [
   {nombre:"Pancake de camote (1 unidad)",kcal:95,prot:1.5,carbs:19,grasas:2,fibra:2,cat:"carbs"},
   {nombre:"Trufa de coco (1 unidad)",kcal:85,prot:0.8,carbs:4,grasas:7.5,fibra:1.5,cat:"grasa"},
   {nombre:"Chip de camote (1 rebanada)",kcal:35,prot:0.6,carbs:8,grasas:0.1,fibra:1,cat:"carbs"},
+  // ── REINTRODUCCIÓN/MANTENIMIENTO: harinas de almendra y linaza, semillas ──
+  {nombre:"Pan de harina de almendras (1 rebanada)",kcal:130,prot:5,carbs:3,grasas:11,fibra:2,cat:"carbs"},
+  {nombre:"Pan de harina de linaza (1 rebanada)",kcal:110,prot:5,carbs:4,grasas:8,fibra:4,cat:"carbs"},
+  {nombre:"Queque keto (1 porción)",kcal:220,prot:6,carbs:6,grasas:19,fibra:3,cat:"carbs"},
+  {nombre:"Queque con harina de almendras (1 porción)",kcal:210,prot:6,carbs:8,grasas:17,fibra:2.5,cat:"carbs"},
+  {nombre:"Galleta con harina de almendras (1 unidad)",kcal:90,prot:3,carbs:4,grasas:7,fibra:1.5,cat:"carbs"},
+  {nombre:"Pudín de chía (1 porción)",kcal:220,prot:5,carbs:12,grasas:16,fibra:8,cat:"carbs"},
+  {nombre:"Linaza (1 cda)",kcal:55,prot:1.9,carbs:3,grasas:4.3,fibra:2.7,cat:"grasa"},
+  {nombre:"Chía (1 cda)",kcal:49,prot:1.7,carbs:4.2,grasas:3.1,fibra:3.4,cat:"grasa"},
+  {nombre:"Harina de almendras (30g)",kcal:180,prot:6.5,carbs:6,grasas:15.5,fibra:3.5,cat:"grasa"},
+  {nombre:"Harina de linaza/lino (30g)",kcal:150,prot:5.5,carbs:9,grasas:12,fibra:8.1,cat:"grasa"},
+  {nombre:"Proteína en polvo (1 scoop, 30g)",kcal:120,prot:24,carbs:3,grasas:1.5,fibra:0,cat:"proteina"},
+  {nombre:"Batido con proteína (1 porción)",kcal:180,prot:25,carbs:8,grasas:4,fibra:2,cat:"proteina"},
+  {nombre:"Barra de proteína (1 unidad)",kcal:200,prot:20,carbs:15,grasas:8,fibra:3,cat:"proteina"},
 ];
 
 
@@ -2180,34 +2195,73 @@ const MINUTA_SEMANAL = [
 ];
 
 // ── MACROS TAB ────────────────────────────────────────────────────────────────
-function MacrosTab({isPremium, onUpgrade}){
+function MacrosTab({isPremium, onUpgrade, email}){
   const [vista, setVista] = useState("macros"); // macros | minuta
-  const [registroMacros, setRegistroMacros] = useState([]);
+  const [historial, setHistorial] = useState({}); // { "2026-07-11": {items:[...]} }
   const [busqueda, setBusqueda] = useState("");
   const [metaProt, setMetaProt] = useState(80);
   const [metaCarbs, setMetaCarbs] = useState(120);
   const [metaGrasas, setMetaGrasas] = useState(60);
+  const [metaFibra, setMetaFibra] = useState(35);
   const [showMetas, setShowMetas] = useState(false);
   const fechaHoy = new Date().toISOString().split("T")[0];
+  const registroMacros = historial[fechaHoy]?.items || [];
 
   useEffect(()=>{
-    try{
-      const r=JSON.parse(localStorage.getItem("macros:hoy")||"{}");
-      if(r.fecha===fechaHoy)setRegistroMacros(r.items||[]);
-      const m=JSON.parse(localStorage.getItem("macros:metas")||"{}");
-      if(m.prot)setMetaProt(m.prot);
-      if(m.carbs)setMetaCarbs(m.carbs);
-      if(m.grasas)setMetaGrasas(m.grasas);
-    }catch{}
-  },[]);
+    (async()=>{
+      // 1) Cargar rápido desde localStorage (offline-first)
+      let local={};
+      try{
+        local=JSON.parse(localStorage.getItem("macros:historial")||"{}");
+        // Migrar formato viejo de un solo día si existía
+        const legacy=JSON.parse(localStorage.getItem("macros:hoy")||"null");
+        if(legacy?.fecha&&legacy.items?.length&&!local[legacy.fecha])local[legacy.fecha]={items:legacy.items};
+        setHistorial(local);
+      }catch{}
+      try{
+        const m=JSON.parse(localStorage.getItem("macros:metas")||"{}");
+        if(m.prot)setMetaProt(m.prot);
+        if(m.carbs)setMetaCarbs(m.carbs);
+        if(m.grasas)setMetaGrasas(m.grasas);
+        setMetaFibra(m.fibra||35);
+      }catch{}
+      // 2) Traer desde Supabase y fusionar (por si el dispositivo perdió el cache local)
+      if(email){
+        try{
+          const remote=await getFromDB("macros",email);
+          const remoteHist=remote?.data||{};
+          setHistorial(prev=>{
+            const merged={...remoteHist,...prev};
+            // Para hoy, nos quedamos con el que tenga más ítems registrados
+            const hoyLocal=prev[fechaHoy]?.items?.length||0;
+            const hoyRemoto=remoteHist[fechaHoy]?.items?.length||0;
+            if(hoyRemoto>hoyLocal)merged[fechaHoy]=remoteHist[fechaHoy];
+            localStorage.setItem("macros:historial",JSON.stringify(merged));
+            return merged;
+          });
+        }catch(e){console.error("Error cargando macros desde Supabase:",e);}
+      }
+    })();
+  },[email]);
+
+  function podar(hist){
+    // Conservar solo los últimos 30 días para no crecer indefinidamente
+    const dias=Object.keys(hist).sort().reverse();
+    if(dias.length<=30)return hist;
+    const limitado={};
+    dias.slice(0,30).forEach(d=>limitado[d]=hist[d]);
+    return limitado;
+  }
 
   async function guardarMacros(items){
-    setRegistroMacros(items);
-    localStorage.setItem("macros:hoy",JSON.stringify({fecha:fechaHoy,items}));
+    const nuevoHist=podar({...historial,[fechaHoy]:{items}});
+    setHistorial(nuevoHist);
+    localStorage.setItem("macros:historial",JSON.stringify(nuevoHist));
+    if(email){try{await saveToDB("macros",email,{data:nuevoHist});}catch(e){console.error("Error guardando macros:",e);}}
   }
 
   function saveMetas(){
-    localStorage.setItem("macros:metas",JSON.stringify({prot:metaProt,carbs:metaCarbs,grasas:metaGrasas}));
+    localStorage.setItem("macros:metas",JSON.stringify({prot:metaProt,carbs:metaCarbs,grasas:metaGrasas,fibra:metaFibra}));
     setShowMetas(false);
   }
 
@@ -2228,6 +2282,29 @@ function MacrosTab({isPremium, onUpgrade}){
     grasas:acc.grasas+(a.grasas||0),
     fibra:acc.fibra+(a.fibra||0),
   }),{kcal:0,prot:0,carbs:0,grasas:0,fibra:0});
+
+  // ── RESUMEN SEMANAL: últimos 7 días (hoy incluido) ──
+  const diasSemana=Array.from({length:7},(_,i)=>{
+    const d=new Date();
+    d.setDate(d.getDate()-(6-i));
+    return d.toISOString().split("T")[0];
+  });
+  function totalesDia(fecha){
+    const items=historial[fecha]?.items||[];
+    return items.reduce((acc,a)=>({
+      prot:acc.prot+(a.prot||0),carbs:acc.carbs+(a.carbs||0),
+      grasas:acc.grasas+(a.grasas||0),fibra:acc.fibra+(a.fibra||0),
+    }),{prot:0,carbs:0,grasas:0,fibra:0});
+  }
+  function cumplioDia(fecha){
+    const t=totalesDia(fecha);
+    const tieneRegistro=(historial[fecha]?.items||[]).length>0;
+    return{
+      registro:tieneRegistro,
+      prot:t.prot>=metaProt, carbs:t.carbs>=metaCarbs,
+      grasas:t.grasas>=metaGrasas, fibra:t.fibra>=metaFibra,
+    };
+  }
 
   const filtrados=busqueda.length>1?ALIMENTOS_MACROS.filter(a=>a.nombre.toLowerCase().includes(busqueda.toLowerCase())):[];
 
@@ -2284,10 +2361,32 @@ function MacrosTab({isPremium, onUpgrade}){
             <BarraMacro label="🥩 Proteína" val={totales.prot} meta={metaProt} color={T.terra}/>
             <BarraMacro label="🍠 Carbohidratos" val={totales.carbs} meta={metaCarbs} color={T.sage}/>
             <BarraMacro label="🥑 Grasas saludables" val={totales.grasas} meta={metaGrasas} color={T.brownMid}/>
-            <div style={{display:"flex",justifyContent:"space-between",padding:"10px 0",borderTop:`1px solid ${T.stonePale}`,marginTop:4}}>
-              <span style={{fontSize:12,color:T.stone}}>🌾 Fibra</span>
-              <span style={{fontSize:12,fontWeight:700,color:T.ok}}>{Math.round(totales.fibra)}g</span>
+            <BarraMacro label="🌾 Fibra" val={totales.fibra} meta={metaFibra} color={T.ok}/>
+          </div>
+
+          {/* RESUMEN SEMANAL */}
+          <div style={{borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,padding:"20px",marginBottom:16}}>
+            <p style={{fontSize:11,fontWeight:700,color:T.stone,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:14}}>Resumen semanal · ¿Cumpliste tus metas?</p>
+            <div style={{display:"flex",justifyContent:"space-between",gap:4}}>
+              {diasSemana.map(fecha=>{
+                const c=cumplioDia(fecha);
+                const esHoy=fecha===fechaHoy;
+                const d=new Date(fecha+"T12:00:00");
+                const letra=d.toLocaleDateString("es-CL",{weekday:"short"}).slice(0,1).toUpperCase();
+                const puntos=[["P",c.prot,T.terra],["C",c.carbs,T.sage],["G",c.grasas,T.brownMid],["F",c.fibra,T.ok]];
+                return(
+                  <div key={fecha} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:6,flex:1}}>
+                    <span style={{fontSize:10,fontWeight:700,color:esHoy?T.sage:T.stone}}>{letra}</span>
+                    <div style={{display:"flex",flexDirection:"column",gap:3}}>
+                      {puntos.map(([k,ok,color])=>(
+                        <div key={k} title={k} style={{width:9,height:9,borderRadius:"50%",background:!c.registro?T.stonePale:(ok?color:T.stonePale),border:!c.registro?`1px solid ${T.stoneMid}`:"none"}}/>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
+            <p style={{fontSize:10,color:T.stone,marginTop:14,textAlign:"center"}}>P Proteína · C Carbohidratos · G Grasas · F Fibra — punto de color = meta cumplida ese día</p>
           </div>
 
           {/* BUSCADOR DE ALIMENTOS */}
@@ -2329,7 +2428,7 @@ function MacrosTab({isPremium, onUpgrade}){
               <div onClick={e=>e.stopPropagation()} style={{width:"100%",maxWidth:480,borderRadius:"28px 28px 0 0",background:T.cream,padding:"24px 20px 40px",fontFamily:FB}}>
                 <div style={{display:"flex",justifyContent:"center",marginBottom:16}}><div style={{width:40,height:4,borderRadius:2,background:T.stoneMid}}/></div>
                 <h3 style={{fontFamily:FD,fontSize:18,color:T.brown,fontWeight:700,marginBottom:16}}>Personalizar metas</h3>
-                {[["🥩 Proteína (g)",metaProt,setMetaProt],[" 🍠 Carbohidratos (g)",metaCarbs,setMetaCarbs],["🥑 Grasas (g)",metaGrasas,setMetaGrasas]].map(([label,val,setVal])=>(
+                {[["🥩 Proteína (g)",metaProt,setMetaProt],[" 🍠 Carbohidratos (g)",metaCarbs,setMetaCarbs],["🥑 Grasas (g)",metaGrasas,setMetaGrasas],["🌾 Fibra (g)",metaFibra,setMetaFibra]].map(([label,val,setVal])=>(
                   <div key={label} style={{marginBottom:14}}>
                     <p style={{fontSize:12,fontWeight:700,color:T.brown,marginBottom:6}}>{label}</p>
                     <input type="number" value={val} onChange={e=>setVal(Number(e.target.value))} style={{width:"100%",padding:"12px 16px",borderRadius:14,border:`1.5px solid ${T.stoneMid}`,background:T.warmWhite,fontSize:16,color:T.ink,outline:"none",fontFamily:FB,boxSizing:"border-box"}}/>
@@ -2487,7 +2586,7 @@ export default function StopHashimoto(){
       {tab==="home"&&<HomeTab state={state} dispatch={dispatch} goTo={setTab} isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
       {tab==="pantry"&&<PantryTab state={state} dispatch={dispatch} isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
       {tab==="recipes"&&<RecipesTab state={state} dispatch={dispatch} isPremium={isPremium} planType={planType} onUpgrade={()=>setShowPaywall(true)}/>}
-      {tab==="macros"&&<MacrosTab isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
+      {tab==="macros"&&<MacrosTab isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)} email={membership?.email}/>}
       {tab==="sintomas"&&<SintomasTab isPremium={isPremium} onUpgrade={()=>setShowPaywall(true)}/>}
       {tab==="profile"&&<ProfileTab state={state} dispatch={dispatch} isPremium={isPremium} planType={planType} onUpgrade={()=>setShowPaywall(true)}/>}
       <TabBar active={tab} setActive={setTab}/>
