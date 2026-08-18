@@ -1497,7 +1497,15 @@ function ProfileTab({state,dispatch,isPremium,planType,onUpgrade}){
     reader.readAsDataURL(file);
   }
   if(!profile)return null;
-  const rows=[["Edad",profile.edad?`${profile.edad} años`:"—"],["Peso",profile.peso?`${profile.peso} kg`:"—"],["Altura",profile.altura?`${profile.altura} cm`:"—"],["Actividad",profile.actividad||"—"],["Sueño",profile.sueno?`${profile.sueno} h`:"—"],["Estrés",profile.estres||"—"],["Diagnóstico",profile.tiempo_dx||"—"],["Fase Método Eri",profile.fase_eri||"—"],["Objetivo",profile.objetivo||"—"]];
+  const rows=[["Edad",profile.edad?`${profile.edad} años`:"—"],["Peso",profile.peso?`${profile.peso} kg`:"—"],["Altura",profile.altura?`${profile.altura} cm`:"—"],["Actividad",profile.actividad||"—"],["Sueño",profile.sueno?`${profile.sueno} h`:"—"],["Estrés",profile.estres||"—"],["Diagnóstico",profile.tiempo_dx||"—"],["Objetivo",profile.objetivo||"—"]];
+  const [cambiandoFase,setCambiandoFase]=useState(false);
+  const faseActualPerfil=profile.fase_eri&&FASES[profile.fase_eri]?profile.fase_eri:"Eliminación";
+  async function cambiarFase(nuevaFase){
+    const p={...profile,fase_eri:nuevaFase};
+    dispatch({type:"SET_PROFILE",p});
+    await dbSet("profile:user",p);
+    setCambiandoFase(false);
+  }
   return(
     <div style={{padding:"56px 20px 96px",fontFamily:FB}}>
       <div style={{display:"flex",flexDirection:"column",alignItems:"center",marginBottom:28}}>
@@ -1534,6 +1542,24 @@ function ProfileTab({state,dispatch,isPremium,planType,onUpgrade}){
           <p style={{fontSize:13,fontWeight:600,color:T.brown}}>{v}</p>
         </div>)}
       </div>
+
+      {/* FASE MÉTODO ERI — editable */}
+      <div style={{borderRadius:20,background:T.warmWhite,border:`1.5px solid ${FASES[faseActualPerfil]?.color||T.sage}55`,padding:"16px",marginBottom:16}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:cambiandoFase?12:0}}>
+          <div>
+            <p style={{fontSize:11,fontWeight:700,color:T.stone,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:4}}>🔄 Fase Método Eri</p>
+            <p style={{fontFamily:FD,fontSize:18,fontWeight:700,color:FASES[faseActualPerfil]?.color||T.brown}}>{faseActualPerfil}</p>
+          </div>
+          <button onClick={()=>setCambiandoFase(v=>!v)} style={{padding:"8px 14px",borderRadius:12,border:`1.5px solid ${T.stoneMid}`,background:"transparent",color:T.brownMid,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:FB}}>{cambiandoFase?"Cancelar":"Cambiar fase"}</button>
+        </div>
+        {cambiandoFase&&<div style={{display:"flex",flexWrap:"wrap",gap:8,marginTop:4}}>
+          {Object.keys(FASES).map(f=>(
+            <button key={f} onClick={()=>cambiarFase(f)} style={{padding:"10px 14px",borderRadius:14,border:`1.5px solid ${f===faseActualPerfil?FASES[f].color:T.stonePale}`,background:f===faseActualPerfil?`${FASES[f].color}18`:T.warmWhite,color:f===faseActualPerfil?FASES[f].color:T.brownMid,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:FB}}>{f}</button>
+          ))}
+        </div>}
+        <p style={{fontSize:11,color:T.stone,lineHeight:1.5,marginTop:cambiandoFase?12:8}}>Al cambiar de fase se actualizan automáticamente los alimentos permitidos en recetas, verificador de etiquetas y contador de macros.</p>
+      </div>
+
       {profile.sintomas?.length>0&&<div style={{borderRadius:20,background:T.warmWhite,border:`1px solid ${T.stonePale}`,padding:"16px",marginBottom:16}}>
         <p style={{fontSize:10,fontWeight:700,color:T.stone,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:10}}>Síntomas en seguimiento</p>
         <div style={{display:"flex",flexWrap:"wrap",gap:6}}>{profile.sintomas.map(s=><span key={s} style={{fontSize:11,padding:"5px 10px",borderRadius:12,background:T.terraPale,color:T.terra,fontWeight:600}}>{s}</span>)}</div>
