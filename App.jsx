@@ -891,10 +891,28 @@ function HomeTab({state,goTo,isPremium,onUpgrade}){
       <BienestarSection/>
 
       {/* ACCESOS RÁPIDOS */}
-      <button onClick={()=>goTo("recipes")} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"18px 20px",borderRadius:22,background:T.warmWhite,border:`1px solid ${T.stonePale}`,cursor:"pointer"}}>
+      <button onClick={()=>goTo("recipes")} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"18px 20px",borderRadius:22,background:T.warmWhite,border:`1px solid ${T.stonePale}`,cursor:"pointer",marginBottom:16}}>
         <div style={{display:"flex",alignItems:"center",gap:12}}><ChefHat size={20} color={T.sage}/><div style={{textAlign:"left"}}><p style={{fontSize:14,fontWeight:700,color:T.brown,fontFamily:FB}}>¿Qué cocino hoy?</p><p style={{fontSize:11,color:T.stone,marginTop:2}}>Recetas Método Eri</p></div></div>
         <ChevronRight size={18} color={T.stoneMid}/>
       </button>
+
+      {/* PODCAST — Stop Hashimoto / Dinka Health Coach */}
+      <div style={{borderRadius:22,background:T.warmWhite,border:`1px solid ${T.stonePale}`,padding:"16px",marginBottom:16}}>
+        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
+          <span style={{fontSize:16}}>🎙️</span>
+          <p style={{fontSize:13,fontWeight:700,color:T.brown,fontFamily:FB}}>Podcast Stop Hashimoto</p>
+        </div>
+        <iframe
+          title="Podcast Stop Hashimoto"
+          style={{borderRadius:14,border:"none"}}
+          src="https://open.spotify.com/embed/show/033Zk5iriZqIqQLORwDk9T?utm_source=generator&theme=0"
+          width="100%"
+          height="152"
+          allowFullScreen=""
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          loading="lazy"
+        />
+      </div>
     </div>
   );
 }
