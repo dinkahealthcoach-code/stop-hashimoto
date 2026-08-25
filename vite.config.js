@@ -14,8 +14,8 @@ export default defineConfig({
         description: 'Tu acompañante diario para el Método ERI: recetas, seguimiento y protocolo personalizado.',
         start_url: '/',
         display: 'standalone',
-        background_color: '#F7F1E8',
-        theme_color: '#F7F1E8',
+        background_color: '#2F6B63',
+        theme_color: '#2F6B63',
         orientation: 'portrait',
         icons: [
           {
