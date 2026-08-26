@@ -24,7 +24,6 @@ export default async function handler(req, res) {
   const cleanEmail = email.toLowerCase().trim();
 
   try {
-    // 1) Buscar el perfil normal
     const profiles = await supabaseGet(
       `profiles?email=eq.${encodeURIComponent(cleanEmail)}&select=email,membership,plan_type`
     );
@@ -38,39 +37,11 @@ export default async function handler(req, res) {
       });
     }
 
-    // 2) Auto-reparación: si el webhook de Hotmart falló y no se creó el perfil,
-    // verificar si el email está en alumnas_autorizadas (fuente de verdad server-side)
-    console.log("No profile found for:", cleanEmail, "- checking alumnas_autorizadas");
-    const alumnas = await supabaseGet(
-      `alumnas_autorizadas?email=eq.${encodeURIComponent(cleanEmail)}&select=email`
-    );
-    const esAlumna = Array.isArray(alumnas) && alumnas.length > 0;
-
-    if (esAlumna) {
-      console.log("Email autorizado en alumnas_autorizadas, creando perfil:", cleanEmail);
-      const upsertRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?on_conflict=email`, {
-        method: "POST",
-        headers: {
-          "apikey": SUPABASE_KEY,
-          "Authorization": `Bearer ${SUPABASE_KEY}`,
-          "Content-Type": "application/json",
-          "Prefer": "resolution=merge-duplicates,return=representation",
-        },
-        body: JSON.stringify({
-          email: cleanEmail,
-          membership: "premium",
-          plan_type: "community",
-          updated_at: new Date().toISOString(),
-        }),
-      });
-      const upsertText = await upsertRes.text();
-      console.log("Auto-repair upsert result:", upsertRes.status, upsertText);
-
-      return res.status(200).json({ membership: "premium", plan_type: "community" });
-    }
-
-    // 3) No tiene perfil ni está en alumnas_autorizadas -> free real
-    console.log("Email no encontrado en ninguna fuente:", cleanEmail);
+    // Sin perfil = sin acceso pagado. Ya NO se otorga membresía premium
+    // automática solo por estar en alumnas_autorizadas. Esa tabla ahora es
+    // únicamente para marketing/CRM (segmentación de campañas). El acceso
+    // real solo se activa cuando el webhook de Hotmart confirma un pago.
+    console.log("No profile found for:", cleanEmail, "- membership: free");
     return res.status(200).json({ membership: "free", plan_type: "general" });
   } catch (err) {
     console.error("Error verify-membership:", err);
